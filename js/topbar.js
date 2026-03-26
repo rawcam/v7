@@ -86,6 +86,8 @@ const TopbarModule = (function() {
 
     function saveProjects() {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
+        renderDashboard();
+        renderProjectsList();
     }
 
     function getStatusText(status) {
@@ -331,8 +333,7 @@ const TopbarModule = (function() {
             purchases: []
         };
         projects.push(newProject);
-        saveProjects();
-        renderDashboard();
+        saveProjects(); // сохраняет и обновляет дашборд
         if (typeof ProjectDetail !== 'undefined') {
             ProjectDetail.showDetail(newProject.id);
         }
@@ -373,8 +374,6 @@ const TopbarModule = (function() {
                 if (confirm('Удалить проект?')) {
                     projects = projects.filter(p => p.id !== id);
                     saveProjects();
-                    renderDashboard();
-                    renderProjectsList();
                 }
             });
         });
@@ -444,42 +443,37 @@ const TopbarModule = (function() {
     }
 
     function switchToSection(section) {
-    currentSection = section;
-    document.querySelectorAll('.topbar-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.section === section);
-    });
-    document.querySelectorAll('.section-container').forEach(container => {
-        container.classList.toggle('active', container.id === `${section}Container`);
-    });
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.querySelector('.main-content');
-    if (section === 'calculations') {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (mainContent) mainContent.classList.remove('full-width');
-    } else {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('full-width');
-    }
+        currentSection = section;
+        document.querySelectorAll('.topbar-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.section === section);
+        });
+        document.querySelectorAll('.section-container').forEach(container => {
+            container.classList.toggle('active', container.id === `${section}Container`);
+        });
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        if (section === 'calculations') {
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (mainContent) mainContent.classList.remove('full-width');
+        } else {
+            if (sidebar) sidebar.classList.add('hidden');
+            if (mainContent) mainContent.classList.add('full-width');
+        }
 
-    // Принудительно скрываем всё, что связано с проектами, если уходим из раздела проектов
-    if (section !== 'projects') {
-        const projectsContainer = document.getElementById('projectsContainer');
         const detailContainer = document.getElementById('projectDetailContainer');
-        if (projectsContainer) projectsContainer.style.display = 'block'; // возвращаем список к стандартному отображению, чтобы он не мешал
-        if (detailContainer) detailContainer.style.display = 'none';
-        // также можно сбросить inline-стили для projectsContainer, если они были
-        if (projectsContainer) projectsContainer.style.display = '';
+        if (section !== 'projects' && detailContainer) {
+            detailContainer.style.display = 'none';
+        }
+
+        if (section === 'dashboard') renderDashboard();
+        if (section === 'projects') {
+            const projectsContainer = document.getElementById('projectsContainer');
+            if (projectsContainer) projectsContainer.style.display = 'block';
+            renderProjectsList();
+        }
+        if (section === 'templates') renderTemplates();
     }
 
-    if (section === 'dashboard') renderDashboard();
-    if (section === 'projects') {
-        // при входе в проекты показываем список, детальная уже скрыта
-        const projectsContainer = document.getElementById('projectsContainer');
-        if (projectsContainer) projectsContainer.style.display = 'block';
-        renderProjectsList();
-    }
-    if (section === 'templates') renderTemplates();
-}
     function init() {
         loadProjects();
         renderDashboard();
@@ -497,5 +491,5 @@ const TopbarModule = (function() {
         switchToSection('dashboard');
     }
 
-    return { init, renderDashboard, renderProjectsList };
+    return { init, renderDashboard, renderProjectsList, loadProjects };
 })();
