@@ -265,6 +265,53 @@ const StorageModule = (function() {
     function destroy() {
         if (unsubscribe) unsubscribe();
     }
+function saveToLocalStorage() {
+    const state = AppState.getState();
+    const projectData = {
+        version: '6.1.0',
+        globalSettings: state.globalSettings,
+        paths: state.paths,
+        projectSwitches: state.projectSwitches,
+        ledConfig: state.ledConfig,
+        soundConfig: state.soundConfig,
+        vcConfig: state.vcConfig,
+        nextPathId: state.nextPathId,
+        nextSwitchId: state.nextSwitchId,
+        activePathId: state.activePathId,
+        viewMode: state.viewMode
+    };
+    localStorage.setItem('sputnik_studio_project', JSON.stringify(projectData));
+    alert('Проект сохранён в браузере');
+}
 
+function exportToJson() {
+    const state = AppState.getState();
+    const projectData = {
+        version: '6.1.0',
+        exportDate: new Date().toISOString(),
+        globalSettings: state.globalSettings,
+        paths: state.paths,
+        projectSwitches: state.projectSwitches,
+        ledConfig: state.ledConfig,
+        soundConfig: state.soundConfig,
+        vcConfig: state.vcConfig,
+        nextPathId: state.nextPathId,
+        nextSwitchId: state.nextSwitchId,
+        activePathId: state.activePathId,
+        viewMode: state.viewMode
+    };
+    const json = JSON.stringify(projectData, null, 2);
+    const fileName = `sputnik-studio_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+    const blob = new Blob([json], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert(`Проект экспортирован в файл ${fileName}`);
+}
     return { init, destroy };
 })();
