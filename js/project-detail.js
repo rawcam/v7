@@ -71,7 +71,6 @@ const ProjectDetail = (function() {
         return next[status] || null;
     }
 
-    // Автоматический прогресс на основе статуса
     function getProgressByStatus(status) {
         switch(status) {
             case 'presale': return 10;
@@ -91,7 +90,6 @@ const ProjectDetail = (function() {
         const p = currentProject;
         const nextStatus = getNextStatusText(p.status);
         const autoProgress = getProgressByStatus(p.status);
-        // Если прогресс ещё не сохранён, используем автоматический
         const progress = p.progress !== undefined ? p.progress : autoProgress;
 
         container.innerHTML = `
@@ -211,7 +209,6 @@ const ProjectDetail = (function() {
             e.target.value = formatCurrency(val);
         });
 
-        // При изменении статуса обновляем прогресс
         const statusSelect = document.getElementById('projectStatus');
         if (statusSelect) {
             statusSelect.addEventListener('change', (e) => {
@@ -257,7 +254,6 @@ const ProjectDetail = (function() {
     function saveChanges() {
         if (!currentProject) return;
 
-        // Получаем значения полей
         currentProject.name = document.getElementById('projectName').value;
         currentProject.status = document.getElementById('projectStatus').value;
         currentProject.priority = document.getElementById('projectPriority').checked;
@@ -265,11 +261,9 @@ const ProjectDetail = (function() {
         currentProject.startDate = document.getElementById('projectStartDate').value;
         currentProject.engineer = document.getElementById('projectEngineer').value;
         currentProject.projectManager = document.getElementById('projectManager').value;
-        // Сохраняем автоматический прогресс на основе статуса
         currentProject.progress = getProgressByStatus(currentProject.status);
         currentProject.nextStatusDate = document.getElementById('nextStatusDate')?.value || null;
 
-        // Сохраняем встречи
         const meetings = [];
         const meetingItems = document.querySelectorAll('#meetingsList .list-item');
         meetingItems.forEach((item, idx) => {
@@ -281,7 +275,6 @@ const ProjectDetail = (function() {
         });
         currentProject.meetings = meetings;
 
-        // Сохраняем закупки
         const purchases = [];
         const purchaseItems = document.querySelectorAll('#purchasesList .list-item');
         purchaseItems.forEach((item, idx) => {
@@ -296,7 +289,7 @@ const ProjectDetail = (function() {
 
         updateProject(currentProject);
         alert('Изменения сохранены');
-        renderDetail(); // перерисовываем с обновлёнными данными
+        renderDetail();
     }
 
     function showDetail(projectId) {
