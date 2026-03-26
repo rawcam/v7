@@ -313,5 +313,5 @@ function exportToJson() {
     URL.revokeObjectURL(url);
     alert(`Проект экспортирован в файл ${fileName}`);
 }
-    return { init, destroy };
+    return { init, destroy, saveToLocalStorage, exportToJson };
 })();
