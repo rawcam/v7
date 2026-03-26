@@ -1,7 +1,8 @@
-// topbar.js – полная версия с исправленными функциями
+// topbar.js – обновлённая версия с каруселью и новыми виджетами
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
+    let projectsSwiper = null;
 
     console.log('topbar.js loaded');
 
@@ -109,6 +110,7 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
+    // ========== ОБЩАЯ СТАТИСТИКА ==========
     function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
@@ -135,6 +137,7 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ ==========
     function renderUrgentWidget() {
         const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
         const container = document.getElementById('urgentProjectsWidget');
@@ -162,6 +165,7 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== ВИДЖЕТ ВСТРЕЧ ==========
     function renderMeetingsWidget() {
         const allMeetings = [];
         projects.forEach(project => {
@@ -196,56 +200,124 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== ВИДЖЕТ ОБЩЕГО БЮДЖЕТА ==========
+    function renderBudgetWidget() {
+        const activeProjects = projects.filter(p => p.status !== 'done');
+        const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+        const container = document.getElementById('budgetWidget');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Общий бюджет</div>
+                <div class="project-status">${activeProjects.length} проекта</div>
+            </div>
+            <div class="budget-amount" style="font-size: 1.8rem; font-weight: 700; margin: 16px 0; text-align: center; background: linear-gradient(135deg, var(--text-primary), var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent;">
+                ${formatCurrency(totalBudget)}
+            </div>
+            <div class="budget-note" style="font-size: 0.7rem; text-align: center; color: var(--text-secondary);">по активным проектам</div>
+        `;
+    }
+
+    // ========== ВИДЖЕТ СРЕДНЕГО ПРОГРЕССА ==========
+    function renderProgressWidget() {
+        const activeProjects = projects.filter(p => p.status !== 'done');
+        const avgProgress = activeProjects.length ? Math.round(activeProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / activeProjects.length) : 0;
+        const container = document.getElementById('progressWidget');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Средний прогресс</div>
+                <div class="project-status">по всем проектам</div>
+            </div>
+            <div class="progress-amount" style="font-size: 2rem; font-weight: 700; margin: 16px 0; text-align: center; background: linear-gradient(135deg, var(--text-primary), var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent;">
+                ${avgProgress}%
+            </div>
+            <div class="progress-bar" style="height: 6px; background: var(--card-bg); border-radius: 3px; margin-top: 8px;">
+                <div style="width: ${avgProgress}%; height: 100%; background: var(--accent); border-radius: 3px;"></div>
+            </div>
+        `;
+    }
+
+    // ========== КАРТОЧКИ АКТИВНЫХ ПРОЕКТОВ (для карусели) ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
         if (!container) return;
         container.innerHTML = activeProjects.map(p => `
-            <div class="project-card ${p.priority ? 'priority-card' : ''}" data-id="${p.id}">
-                <div class="project-header">
-                    <div class="project-name">${escapeHtml(p.name)}</div>
-                    <div class="project-status ${getStatusColor(p.status)}">${getStatusText(p.status)}</div>
-                    ${p.priority ? '<span class="priority-badge">Срочно</span>' : ''}
-                </div>
-                <div class="project-meta">
-                    <div><i class="fas fa-calendar-alt"></i> Начало: ${p.startDate}</div>
-                    <div><i class="fas fa-ruble-sign"></i> Бюджет: ${formatCurrency(p.budget)}</div>
-                    <div><i class="fas fa-user"></i> Инженер: ${escapeHtml(p.engineer)}</div>
-                    <div><i class="fas fa-user-tie"></i> РП: ${escapeHtml(p.projectManager)}</div>
-                </div>
-                <div class="project-progress-bar">
-                    <div class="progress-fill" style="width: ${p.progress}%; background: ${p.priority ? '#f97316' : 'var(--accent)'}"></div>
-                </div>
-                <div class="project-roadmap">
-                    <div class="roadmap-item">
-                        <span class="roadmap-status current">${getStatusText(p.status)}</span>
-                        <span class="roadmap-date">с ${p.statusStartDate}</span>
-                        ${p.nextStatus ? `<span class="roadmap-arrow">→</span>
-                        <span class="roadmap-status next">${getStatusText(p.nextStatus)}</span>
-                        <span class="roadmap-date">с ${p.nextStatusDate}</span>` : ''}
+            <div class="swiper-slide">
+                <div class="project-card ${p.priority ? 'priority-card' : ''}" data-id="${p.id}">
+                    <div class="project-header">
+                        <div class="project-name">${escapeHtml(p.name)}</div>
+                        <div class="project-status ${getStatusColor(p.status)}">${getStatusText(p.status)}</div>
+                        ${p.priority ? '<span class="priority-badge">Срочно</span>' : ''}
                     </div>
+                    <div class="project-meta">
+                        <div><i class="fas fa-calendar-alt"></i> Начало: ${p.startDate}</div>
+                        <div><i class="fas fa-ruble-sign"></i> Бюджет: ${formatCurrency(p.budget)}</div>
+                        <div><i class="fas fa-user"></i> Инженер: ${escapeHtml(p.engineer)}</div>
+                        <div><i class="fas fa-user-tie"></i> РП: ${escapeHtml(p.projectManager)}</div>
+                    </div>
+                    <div class="project-progress-bar">
+                        <div class="progress-fill" style="width: ${p.progress}%; background: ${p.priority ? '#f97316' : 'var(--accent)'}"></div>
+                    </div>
+                    <div class="project-roadmap">
+                        <div class="roadmap-item">
+                            <span class="roadmap-status current">${getStatusText(p.status)}</span>
+                            <span class="roadmap-date">с ${p.statusStartDate}</span>
+                            ${p.nextStatus ? `<span class="roadmap-arrow">→</span>
+                            <span class="roadmap-status next">${getStatusText(p.nextStatus)}</span>
+                            <span class="roadmap-date">с ${p.nextStatusDate}</span>` : ''}
+                        </div>
+                    </div>
+                    <details class="project-details">
+                        <summary>Встречи и закупки</summary>
+                        <div class="meetings-list">
+                            <h4>Встречи</h4>
+                            ${(p.meetings || []).map(m => `<div class="meeting-item">${m.date} — ${escapeHtml(m.subject)}</div>`).join('') || '<div>Нет встреч</div>'}
+                        </div>
+                        <div class="purchases-list">
+                            <h4>Закупки</h4>
+                            ${(p.purchases || []).map(pr => `<div class="purchase-item">${pr.name} — ${pr.status === 'ordered' ? 'Заказано' : 'Доставлено'} (${pr.date})</div>`).join('') || '<div>Нет закупок</div>'}
+                        </div>
+                    </details>
                 </div>
-                <details class="project-details">
-                    <summary>Встречи и закупки</summary>
-                    <div class="meetings-list">
-                        <h4>Встречи</h4>
-                        ${(p.meetings || []).map(m => `<div class="meeting-item">${m.date} — ${escapeHtml(m.subject)}</div>`).join('') || '<div>Нет встреч</div>'}
-                    </div>
-                    <div class="purchases-list">
-                        <h4>Закупки</h4>
-                        ${(p.purchases || []).map(pr => `<div class="purchase-item">${pr.name} — ${pr.status === 'ordered' ? 'Заказано' : 'Доставлено'} (${pr.date})</div>`).join('') || '<div>Нет закупок</div>'}
-                    </div>
-                </details>
             </div>
         `).join('');
         if (activeProjects.length === 0) container.innerHTML = '<div class="empty-state">Нет активных проектов</div>';
+        initProjectsSwiper();
+    }
+
+    function initProjectsSwiper() {
+        const container = document.getElementById('projectsSwiperContainer');
+        if (!container) return;
+        if (projectsSwiper) projectsSwiper.destroy(true, true);
+        // Проверяем, есть ли слайды
+        if (document.querySelectorAll('.swiper-slide').length === 0) return;
+        projectsSwiper = new Swiper(container, {
+            slidesPerView: 1,
+            spaceBetween: 24,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+                1280: { slidesPerView: 4 },
+            },
+        });
     }
 
     function renderDashboard() {
-        console.log('renderDashboard called');
         renderStatsCard();
         renderUrgentWidget();
         renderMeetingsWidget();
+        renderBudgetWidget();
+        renderProgressWidget();
         renderProjectCards();
     }
 
@@ -278,6 +350,7 @@ const TopbarModule = (function() {
         renderDashboard();
     }
 
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
         console.log('switchToSection:', section);
         currentSection = section;
@@ -301,6 +374,7 @@ const TopbarModule = (function() {
         if (section === 'templates') renderTemplates();
     }
 
+    // ========== ПРОЕКТЫ (список) ==========
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -338,6 +412,7 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
@@ -418,53 +493,6 @@ const TopbarModule = (function() {
 
         switchToSection('dashboard');
     }
-// topbar.js – добавить в конец файла перед return { init }
 
-function renderBudgetWidget() {
-    const activeProjects = projects.filter(p => p.status !== 'done');
-    const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
-    const container = document.getElementById('budgetWidget');
-    if (!container) return;
-    container.innerHTML = `
-        <div class="project-header">
-            <div class="project-name">Общий бюджет</div>
-        </div>
-        <div class="budget-value" style="font-size: 1.5rem; font-weight: 700; text-align: center; margin: 16px 0;">
-            ${formatCurrency(totalBudget)}
-        </div>
-        <div class="budget-note" style="font-size: 0.7rem; text-align: center; color: var(--text-secondary);">
-            по активным проектам
-        </div>
-    `;
-}
-
-function renderProgressWidget() {
-    const activeProjects = projects.filter(p => p.status !== 'done');
-    const avgProgress = activeProjects.length
-        ? Math.round(activeProjects.reduce((sum, p) => sum + p.progress, 0) / activeProjects.length)
-        : 0;
-    const container = document.getElementById('progressWidget');
-    if (!container) return;
-    container.innerHTML = `
-        <div class="project-header">
-            <div class="project-name">Средний прогресс</div>
-        </div>
-        <div class="progress-value" style="font-size: 2rem; font-weight: 700; text-align: center; margin: 16px 0;">
-            ${avgProgress}%
-        </div>
-        <div class="progress-bar" style="background: var(--card-bg); border-radius: 20px; height: 8px; margin-top: 8px;">
-            <div style="width: ${avgProgress}%; height: 100%; background: var(--accent); border-radius: 20px;"></div>
-        </div>
-    `;
-}
-
-function renderDashboard() {
-    renderStatsCard();
-    renderUrgentWidget();
-    renderMeetingsWidget();
-    renderBudgetWidget();
-    renderProgressWidget();
-    renderProjectCards();
-}
     return { init };
 })();
