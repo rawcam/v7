@@ -931,3 +931,41 @@ input:focus, select:focus, textarea:focus {
         display: flex; /* показываем только на мобильных */
     }
 }
+/* Карусель проектов */
+.swiper-container {
+    width: 100%;
+    padding: 8px 40px 40px 40px;
+    position: relative;
+}
+.swiper-button-prev,
+.swiper-button-next {
+    color: var(--accent);
+    background: var(--bg-panel);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+    box-shadow: var(--shadow);
+}
+.swiper-button-prev:after,
+.swiper-button-next:after {
+    font-size: 18px;
+}
+.swiper-pagination-bullet {
+    background: var(--text-secondary);
+    opacity: 0.5;
+}
+.swiper-pagination-bullet-active {
+    background: var(--accent);
+    opacity: 1;
+}
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .swiper-container {
+        padding: 8px 20px 40px 20px;
+    }
+    .swiper-button-prev,
+    .swiper-button-next {
+        display: none; /* на мобильных скроем кнопки, оставим пагинацию */
+    }
+}
