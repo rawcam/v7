@@ -1,8 +1,10 @@
-// topbar.js (финальная версия)
+// topbar.js
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
     let projectsSwiper = null;
+    let projectsContainer = null;      // будет создан динамически
+    let projectDetailContainer = null; // будет создан динамически
 
     console.log('topbar.js loaded');
 
@@ -333,16 +335,16 @@ const TopbarModule = (function() {
                                     <th>Статус</th>
                                     <th>Прогресс</th>
                                     <th>Начало</th>
-                                 </tr>
+                                </tr>
                             </thead>
                             <tbody>
                                 ${filteredProjects.map(p => `
                                     <tr style="cursor:pointer;" class="project-row" data-id="${p.id}">
-                                         <td>${escapeHtml(p.name)}</td>
-                                         <td>${getStatusText(p.status)}</td>
-                                         <td>${p.progress}%</td>
-                                         <td>${p.startDate}</td>
-                                     </tr>
+                                        <td>${escapeHtml(p.name)}</td>
+                                        <td>${getStatusText(p.status)}</td>
+                                        <td>${p.progress}%</td>
+                                        <td>${p.startDate}</td>
+                                    </tr>
                                 `).join('')}
                             </tbody>
                         </table>
@@ -370,9 +372,7 @@ const TopbarModule = (function() {
                 const id = row.dataset.id;
                 if (id && typeof ProjectDetail !== 'undefined') {
                     closeModal();
-                    if (typeof TopbarModule !== 'undefined' && TopbarModule.switchToSection) {
-                        TopbarModule.switchToSection('projects');
-                    }
+                    switchToSection('projects');
                     ProjectDetail.showDetail(id);
                 }
             });
@@ -463,7 +463,62 @@ const TopbarModule = (function() {
         renderProjectCards();
     }
 
-    // ========== УПРАВЛЕНИЕ ПРОЕКТАМИ ==========
+    // ========== ДИНАМИЧЕСКОЕ СОЗДАНИЕ РАЗДЕЛА "ПРОЕКТЫ" ==========
+    function createProjectsSection() {
+        // Удаляем старый контейнер, если он есть
+        if (projectsContainer && projectsContainer.parentNode) {
+            projectsContainer.parentNode.removeChild(projectsContainer);
+        }
+        if (projectDetailContainer && projectDetailContainer.parentNode) {
+            projectDetailContainer.parentNode.removeChild(projectDetailContainer);
+        }
+
+        // Создаём контейнер для списка проектов
+        projectsContainer = document.createElement('div');
+        projectsContainer.id = 'projectsContainer';
+        projectsContainer.style.display = 'block';
+        projectsContainer.innerHTML = `
+            <div class="dashboard-wrapper">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>УПРАВЛЕНИЕ ПРОЕКТАМИ</h2>
+                    <button class="btn-primary" id="createProjectBtn"><i class="fas fa-plus"></i> Новый проект</button>
+                </div>
+                <div id="projectsList" class="projects-list"></div>
+            </div>
+        `;
+
+        // Создаём контейнер для детальной страницы
+        projectDetailContainer = document.createElement('div');
+        projectDetailContainer.id = 'projectDetailContainer';
+        projectDetailContainer.style.display = 'none';
+
+        // Вставляем оба контейнера в main-content перед шаблонами
+        const mainContent = document.getElementById('mainContent');
+        const templatesContainer = document.getElementById('templatesContainer');
+        if (mainContent && templatesContainer) {
+            mainContent.insertBefore(projectsContainer, templatesContainer);
+            mainContent.insertBefore(projectDetailContainer, templatesContainer);
+        }
+
+        // Подключаем обработчик для кнопки создания проекта
+        const createBtn = document.getElementById('createProjectBtn');
+        if (createBtn) createBtn.addEventListener('click', createNewProject);
+
+        renderProjectsList();
+    }
+
+    function removeProjectsSection() {
+        if (projectsContainer && projectsContainer.parentNode) {
+            projectsContainer.parentNode.removeChild(projectsContainer);
+            projectsContainer = null;
+        }
+        if (projectDetailContainer && projectDetailContainer.parentNode) {
+            projectDetailContainer.parentNode.removeChild(projectDetailContainer);
+            projectDetailContainer = null;
+        }
+    }
+
+    // ========== УПРАВЛЕНИЕ ПРОЕКТАМИ (рендер списка) ==========
     function renderProjectsList() {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -602,7 +657,7 @@ const TopbarModule = (function() {
         }
     }
 
-    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ (ЖЁСТКОЕ УПРАВЛЕНИЕ) ==========
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
         console.log('switchToSection:', section);
         currentSection = section;
@@ -623,23 +678,15 @@ const TopbarModule = (function() {
             if (mainContent) mainContent.classList.add('full-width');
         }
 
-        // Жёсткое управление контейнерами проектов
-        const projectsContainer = document.getElementById('projectsContainer');
-        const detailContainer = document.getElementById('projectDetailContainer');
-
-        if (section !== 'projects') {
-            if (projectsContainer) projectsContainer.style.display = 'none';
-            if (detailContainer) {
-                detailContainer.style.display = 'none';
-                detailContainer.innerHTML = '';
-            }
+        // Управление разделами проектов
+        if (section === 'projects') {
+            createProjectsSection();
+        } else {
+            removeProjectsSection();
+            // Если детальная страница была открыта, вызываем её метод hideDetail для сброса состояния
             if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
                 ProjectDetail.hideDetail();
             }
-        } else {
-            if (projectsContainer) projectsContainer.style.display = 'block';
-            if (detailContainer) detailContainer.style.display = 'none';
-            renderProjectsList();
         }
 
         if (section === 'dashboard') renderDashboard();
@@ -656,8 +703,6 @@ const TopbarModule = (function() {
             btn.addEventListener('click', () => switchToSection(btn.dataset.section));
         });
 
-        const createBtn = document.getElementById('createProjectBtn');
-        if (createBtn) createBtn.addEventListener('click', createNewProject);
         const generateBtn = document.getElementById('generateDocBtn');
         if (generateBtn) generateBtn.addEventListener('click', generateDocument);
 
