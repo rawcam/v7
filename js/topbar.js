@@ -444,37 +444,42 @@ const TopbarModule = (function() {
     }
 
     function switchToSection(section) {
-        currentSection = section;
-        document.querySelectorAll('.topbar-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.section === section);
-        });
-        document.querySelectorAll('.section-container').forEach(container => {
-            container.classList.toggle('active', container.id === `${section}Container`);
-        });
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.querySelector('.main-content');
-        if (section === 'calculations') {
-            if (sidebar) sidebar.classList.remove('hidden');
-            if (mainContent) mainContent.classList.remove('full-width');
-        } else {
-            if (sidebar) sidebar.classList.add('hidden');
-            if (mainContent) mainContent.classList.add('full-width');
-        }
-
-        const detailContainer = document.getElementById('projectDetailContainer');
-        if (section !== 'projects' && detailContainer) {
-            detailContainer.style.display = 'none';
-        }
-
-        if (section === 'dashboard') renderDashboard();
-        if (section === 'projects') {
-            const projectsContainer = document.getElementById('projectsContainer');
-            if (projectsContainer) projectsContainer.style.display = 'block';
-            renderProjectsList();
-        }
-        if (section === 'templates') renderTemplates();
+    currentSection = section;
+    document.querySelectorAll('.topbar-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === section);
+    });
+    document.querySelectorAll('.section-container').forEach(container => {
+        container.classList.toggle('active', container.id === `${section}Container`);
+    });
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+    if (section === 'calculations') {
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (mainContent) mainContent.classList.remove('full-width');
+    } else {
+        if (sidebar) sidebar.classList.add('hidden');
+        if (mainContent) mainContent.classList.add('full-width');
     }
 
+    // Принудительно скрываем всё, что связано с проектами, если уходим из раздела проектов
+    if (section !== 'projects') {
+        const projectsContainer = document.getElementById('projectsContainer');
+        const detailContainer = document.getElementById('projectDetailContainer');
+        if (projectsContainer) projectsContainer.style.display = 'block'; // возвращаем список к стандартному отображению, чтобы он не мешал
+        if (detailContainer) detailContainer.style.display = 'none';
+        // также можно сбросить inline-стили для projectsContainer, если они были
+        if (projectsContainer) projectsContainer.style.display = '';
+    }
+
+    if (section === 'dashboard') renderDashboard();
+    if (section === 'projects') {
+        // при входе в проекты показываем список, детальная уже скрыта
+        const projectsContainer = document.getElementById('projectsContainer');
+        if (projectsContainer) projectsContainer.style.display = 'block';
+        renderProjectsList();
+    }
+    if (section === 'templates') renderTemplates();
+}
     function init() {
         loadProjects();
         renderDashboard();
