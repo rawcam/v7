@@ -1,4 +1,4 @@
-// topbar.js
+// topbar.js – исправленная версия
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -282,7 +282,6 @@ const TopbarModule = (function() {
         if (projectsSwiper) projectsSwiper.destroy(true, true);
         const container = document.getElementById('projectsSwiperContainer');
         if (!container) return;
-        // Если карточек нет, не инициализируем
         if (document.querySelectorAll('#projectCardsContainer .swiper-slide').length === 0) return;
         projectsSwiper = new Swiper(container, {
             slidesPerView: 1,
@@ -340,6 +339,7 @@ const TopbarModule = (function() {
         projects.push(newProject);
         saveProjects();
         renderDashboard();
+        renderProjectsList(); // обновляем список проектов
     }
 
     // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
@@ -370,7 +370,7 @@ const TopbarModule = (function() {
         const container = document.getElementById('projectsList');
         if (!container) return;
         container.innerHTML = projects.map(p => `
-            <div class="project-card">
+            <div class="project-card" data-id="${p.id}">
                 <div class="project-header">
                     <div class="project-name">${escapeHtml(p.name)}</div>
                     <div class="project-status ${getStatusColor(p.status)}">${getStatusText(p.status)}</div>
@@ -388,7 +388,10 @@ const TopbarModule = (function() {
         if (!projects.length) container.innerHTML = '<div class="empty-state">Нет проектов. Нажмите "Новый проект".</div>';
 
         document.querySelectorAll('.edit-project').forEach(btn => {
-            btn.addEventListener('click', () => alert('Редактирование в разработке'));
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                if (id && typeof ProjectDetail !== 'undefined') ProjectDetail.showDetail(id);
+            });
         });
         document.querySelectorAll('.delete-project').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -484,5 +487,5 @@ const TopbarModule = (function() {
         switchToSection('dashboard');
     }
 
-    return { init };
+    return { init, renderProjectsList, renderDashboard };
 })();
