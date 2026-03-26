@@ -73,9 +73,9 @@
     <div class="topbar-logo"><i class="fas fa-satellite-dish"></i> Sputnik Studio</div>
     <div class="topbar-nav" id="topbarNav">
         <button class="topbar-btn active" data-section="dashboard">Главная</button>
-        <button class="topbar-btn" data-section="calculations">Расчёты</button>
-        <button class="topbar-btn" data-section="projects">Проекты</button>
-        <button class="topbar-btn" data-section="templates">Шаблоны</button>
+    <button class="topbar-btn" data-section="projects">Проекты</button>
+    <button class="topbar-btn" data-section="calculations">Расчёты</button>
+    <button class="topbar-btn" data-section="templates">Шаблоны</button>
     </div>
     <div class="topbar-actions">
         <button id="topbarThemeSwitch" title="Тема"><i class="fas fa-sun"></i></button>
@@ -314,17 +314,19 @@
 
         <!-- Управление проектами -->
         <div id="projectsContainer" class="section-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2>Управление проектами</h2>
-                <button class="btn-primary" id="createProjectBtn"><i class="fas fa-plus"></i> Новый проект</button>
-            </div>
-            <div id="projectsList" class="projects-list"></div>
+    <div class="dashboard-wrapper">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2>УПРАВЛЕНИЕ ПРОЕКТАМИ</h2>
+            <button class="btn-primary" id="createProjectBtn"><i class="fas fa-plus"></i> Новый проект</button>
         </div>
+        <div id="projectsList" class="projects-list"></div>
+    </div>
+</div>
 
         <!-- Шаблоны документов -->
         <div id="templatesContainer" class="section-container">
             <h2>Конструктор документов</h2>
-            <div class="template-builder">
+            <div class="dashboard-wrapper">
                 <div class="setting">
                     <label>Выберите шаблон:</label>
                     <select id="templateSelect">
