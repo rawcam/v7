@@ -655,3 +655,14 @@ body.dark .power-control-wrapper label {
     font-weight: 600;
     color: var(--accent);
 }
+/* ========== ДЛЯ РЕДАКТИРОВАНИЯ САЙДБАРА ========== */
+.section-header .drag-handle {
+    cursor: grab;
+    transition: color 0.2s;
+}
+.section-header .drag-handle:active {
+    cursor: grabbing;
+}
+.section-header:hover .drag-handle {
+    color: var(--accent);
+}
