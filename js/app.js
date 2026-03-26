@@ -14,7 +14,7 @@
     if (typeof LoggerModule !== 'undefined') LoggerModule.init();
     if (typeof SidebarEditor !== 'undefined') SidebarEditor.init();
 
-    // Инициализация топбара (должна быть после всех, так как он может переключать разделы)
+    // Инициализация топбара
     if (typeof TopbarModule !== 'undefined') {
         TopbarModule.init();
     } else {
@@ -79,20 +79,34 @@
         });
     }
 
-    // Обработчики кнопок в топбаре (сохранение, экспорт)
+    // Обработчики кнопок в топбаре
     const topbarSave = document.getElementById('topbarSave');
     const topbarExport = document.getElementById('topbarExport');
-    if (topbarSave && typeof StorageModule !== 'undefined') {
-        topbarSave.addEventListener('click', () => {
-            if (StorageModule.saveToLocalStorage) StorageModule.saveToLocalStorage();
-            else console.warn('StorageModule.saveToLocalStorage not available');
-        });
+
+    console.log('topbarSave element:', topbarSave);
+    console.log('topbarExport element:', topbarExport);
+    console.log('StorageModule:', typeof StorageModule);
+    if (StorageModule) {
+        console.log('StorageModule.saveToLocalStorage:', typeof StorageModule.saveToLocalStorage);
+        console.log('StorageModule.exportToJson:', typeof StorageModule.exportToJson);
     }
-    if (topbarExport && typeof StorageModule !== 'undefined') {
-        topbarExport.addEventListener('click', () => {
-            if (StorageModule.exportToJson) StorageModule.exportToJson();
-            else console.warn('StorageModule.exportToJson not available');
+
+    if (topbarSave && StorageModule && typeof StorageModule.saveToLocalStorage === 'function') {
+        topbarSave.addEventListener('click', () => {
+            console.log('Save button clicked');
+            StorageModule.saveToLocalStorage();
         });
+    } else {
+        console.warn('Save button not ready');
+    }
+
+    if (topbarExport && StorageModule && typeof StorageModule.exportToJson === 'function') {
+        topbarExport.addEventListener('click', () => {
+            console.log('Export button clicked');
+            StorageModule.exportToJson();
+        });
+    } else {
+        console.warn('Export button not ready');
     }
 
     initTheme();
