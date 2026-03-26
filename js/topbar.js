@@ -309,7 +309,6 @@ const TopbarModule = (function() {
         });
     }
 
-    // Модальное окно со списком проектов сотрудника
     function showProjectsModal(person, role) {
         const filteredProjects = projects.filter(p => {
             if (role === 'engineer') return p.engineer === person && p.status !== 'done';
@@ -335,7 +334,7 @@ const TopbarModule = (function() {
                                     <th>Статус</th>
                                     <th>Прогресс</th>
                                     <th>Начало</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody>
                                 ${filteredProjects.map(p => `
@@ -461,7 +460,7 @@ const TopbarModule = (function() {
         renderProgressWidget();
         renderUrgentWidget();
         renderMeetingsWidget();
-        renderWorkloadWidget();   // новый виджет
+        renderWorkloadWidget();
         renderProjectCards();
     }
 
@@ -604,55 +603,50 @@ const TopbarModule = (function() {
         }
     }
 
-    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ (с жёстким скрытием) ==========
     function switchToSection(section) {
-    console.log('switchToSection:', section);
-    currentSection = section;
-    document.querySelectorAll('.topbar-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.section === section);
-    });
-    document.querySelectorAll('.section-container').forEach(container => {
-        container.classList.toggle('active', container.id === `${section}Container`);
-    });
+        console.log('switchToSection:', section);
+        currentSection = section;
+        document.querySelectorAll('.topbar-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.section === section);
+        });
+        document.querySelectorAll('.section-container').forEach(container => {
+            container.classList.toggle('active', container.id === `${section}Container`);
+        });
 
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.querySelector('.main-content');
-    if (section === 'calculations') {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (mainContent) mainContent.classList.remove('full-width');
-    } else {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('full-width');
-    }
-
-    // ========== ЖЁСТКОЕ СКРЫТИЕ ПРОЕКТОВ ПРИ УХОДЕ ==========
-    const projectsContainer = document.getElementById('projectsContainer');
-    const detailContainer = document.getElementById('projectDetailContainer');
-    const projectsList = document.getElementById('projectsList');
-
-    if (section !== 'projects') {
-        // Скрываем контейнеры проектов и детальную страницу
-        if (projectsContainer) projectsContainer.style.display = 'none';
-        if (detailContainer) detailContainer.style.display = 'none';
-        // Если детальная страница открыта, вызываем её метод hideDetail
-        if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
-            ProjectDetail.hideDetail();
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        if (section === 'calculations') {
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (mainContent) mainContent.classList.remove('full-width');
+        } else {
+            if (sidebar) sidebar.classList.add('hidden');
+            if (mainContent) mainContent.classList.add('full-width');
         }
-        // Убедимся, что список проектов не остался видимым
-        if (projectsList) projectsList.style.display = '';
-        // Дополнительно: убираем возможные классы активного раздела у контейнеров проектов
-        if (projectsContainer) projectsContainer.classList.remove('active');
-        if (detailContainer) detailContainer.classList.remove('active');
-    } else {
-        // При входе в раздел проектов показываем список и скрываем детальную
-        if (projectsContainer) projectsContainer.style.display = 'block';
-        if (detailContainer) detailContainer.style.display = 'none';
-        renderProjectsList();
-    }
 
-    if (section === 'dashboard') renderDashboard();
-    if (section === 'templates') renderTemplates();
-}
+        // Жёсткое скрытие проектов при уходе из раздела
+        const projectsContainer = document.getElementById('projectsContainer');
+        const detailContainer = document.getElementById('projectDetailContainer');
+        const projectsList = document.getElementById('projectsList');
+
+        if (section !== 'projects') {
+            if (projectsContainer) projectsContainer.style.display = 'none';
+            if (detailContainer) detailContainer.style.display = 'none';
+            if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
+                ProjectDetail.hideDetail();
+            }
+            if (projectsList) projectsList.style.display = '';
+            if (projectsContainer) projectsContainer.classList.remove('active');
+            if (detailContainer) detailContainer.classList.remove('active');
+        } else {
+            if (projectsContainer) projectsContainer.style.display = 'block';
+            if (detailContainer) detailContainer.style.display = 'none';
+            renderProjectsList();
+        }
+
+        if (section === 'dashboard') renderDashboard();
+        if (section === 'templates') renderTemplates();
+    }
 
     // ========== ИНИЦИАЛИЗАЦИЯ ==========
     function init() {
