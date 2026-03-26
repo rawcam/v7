@@ -115,3 +115,4 @@
     initSidebarCollapse();
     initMobileMenu();
 })();
+if (typeof ProjectDetail !== 'undefined') ProjectDetail.init();
