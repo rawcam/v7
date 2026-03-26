@@ -1,23 +1,10 @@
 // app.js
 (function() {
-    // Инициализация всех модулей
-    if (typeof Accordion !== 'undefined') Accordion.init();
-    // Вместо прямого вызова VideoModule.init() и NetworkModule.init()
-setTimeout(() => {
-    if (typeof VideoModule !== 'undefined') VideoModule.init();
-    if (typeof NetworkModule !== 'undefined') NetworkModule.init();
-    if (typeof TractsModule !== 'undefined') TractsModule.init();
-    // ... остальные модули, которые работают с DOM
-}, 100);
-    if (typeof TractsModule !== 'undefined') TractsModule.init();
-    if (typeof LedModule !== 'undefined') LedModule.init();
-    if (typeof SoundModule !== 'undefined') SoundModule.init();
-    if (typeof VcModule !== 'undefined') VcModule.init();
-    if (typeof ErgoModule !== 'undefined') ErgoModule.init();
-    if (typeof PowerModule !== 'undefined') PowerModule.init();
-    if (typeof StorageModule !== 'undefined') StorageModule.init();
+    let calculationsInitialized = false;
+
+    // Модули, которые не зависят от сайдбара
     if (typeof LoggerModule !== 'undefined') LoggerModule.init();
-    if (typeof SidebarEditor !== 'undefined') SidebarEditor.init();
+    if (typeof StorageModule !== 'undefined') StorageModule.init();
 
     // Инициализация топбара
     if (typeof TopbarModule !== 'undefined') {
@@ -25,6 +12,36 @@ setTimeout(() => {
     } else {
         console.error('TopbarModule not loaded');
     }
+
+    // Функция инициализации всех модулей, зависящих от сайдбара
+    function initCalculationsModules() {
+        if (calculationsInitialized) return;
+        calculationsInitialized = true;
+        console.log('Initializing calculations modules');
+
+        if (typeof Accordion !== 'undefined') Accordion.init();
+        if (typeof VideoModule !== 'undefined') VideoModule.init();
+        if (typeof NetworkModule !== 'undefined') NetworkModule.init();
+        if (typeof TractsModule !== 'undefined') TractsModule.init();
+        if (typeof LedModule !== 'undefined') LedModule.init();
+        if (typeof SoundModule !== 'undefined') SoundModule.init();
+        if (typeof VcModule !== 'undefined') VcModule.init();
+        if (typeof ErgoModule !== 'undefined') ErgoModule.init();
+        if (typeof PowerModule !== 'undefined') PowerModule.init();
+        if (typeof SidebarEditor !== 'undefined') SidebarEditor.init();
+    }
+
+    // Следим за переключением на раздел "Расчёты"
+    function waitForCalculations() {
+        const checkInterval = setInterval(() => {
+            const calculationsContainer = document.getElementById('calculationsContainer');
+            if (calculationsContainer && calculationsContainer.classList.contains('active')) {
+                clearInterval(checkInterval);
+                initCalculationsModules();
+            }
+        }, 100);
+    }
+    waitForCalculations();
 
     function initTheme() {
         const themeSwitch = document.getElementById('themeSwitch');
@@ -54,6 +71,7 @@ setTimeout(() => {
     function initSidebarCollapse() {
         const sidebar = document.getElementById('sidebar');
         const collapseBtn = document.getElementById('collapseSidebarBtn');
+        if (!sidebar || !collapseBtn) return;
         function setSidebarCollapsed(collapsed) {
             if(collapsed){
                 sidebar.classList.add('collapsed');
@@ -65,9 +83,7 @@ setTimeout(() => {
                 localStorage.setItem('sidebarCollapsed', 'false');
             }
         }
-        if (collapseBtn) {
-            collapseBtn.addEventListener('click', () => setSidebarCollapsed(!sidebar.classList.contains('collapsed')));
-        }
+        collapseBtn.addEventListener('click', () => setSidebarCollapsed(!sidebar.classList.contains('collapsed')));
         if (localStorage.getItem('sidebarCollapsed') === 'true') setSidebarCollapsed(true);
     }
 
@@ -88,30 +104,11 @@ setTimeout(() => {
     const topbarSave = document.getElementById('topbarSave');
     const topbarExport = document.getElementById('topbarExport');
 
-    console.log('topbarSave element:', topbarSave);
-    console.log('topbarExport element:', topbarExport);
-    console.log('StorageModule:', typeof StorageModule);
-    if (StorageModule) {
-        console.log('StorageModule.saveToLocalStorage:', typeof StorageModule.saveToLocalStorage);
-        console.log('StorageModule.exportToJson:', typeof StorageModule.exportToJson);
-    }
-
     if (topbarSave && StorageModule && typeof StorageModule.saveToLocalStorage === 'function') {
-        topbarSave.addEventListener('click', () => {
-            console.log('Save button clicked');
-            StorageModule.saveToLocalStorage();
-        });
-    } else {
-        console.warn('Save button not ready');
+        topbarSave.addEventListener('click', () => StorageModule.saveToLocalStorage());
     }
-
     if (topbarExport && StorageModule && typeof StorageModule.exportToJson === 'function') {
-        topbarExport.addEventListener('click', () => {
-            console.log('Export button clicked');
-            StorageModule.exportToJson();
-        });
-    } else {
-        console.warn('Export button not ready');
+        topbarExport.addEventListener('click', () => StorageModule.exportToJson());
     }
 
     initTheme();
