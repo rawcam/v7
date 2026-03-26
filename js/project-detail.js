@@ -1,4 +1,4 @@
-// project-detail.js
+// project-detail.js (исправленный)
 const ProjectDetail = (function() {
     let currentProjectId = null;
     let currentProject = null;
@@ -10,11 +10,13 @@ const ProjectDetail = (function() {
 
     function saveProjects(projects) {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
-        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderDashboard) {
-            TopbarModule.renderDashboard();
-        }
-        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
-            TopbarModule.renderProjectsList();
+        // Принудительно обновляем данные в TopbarModule
+        if (typeof TopbarModule !== 'undefined') {
+            // Перезагружаем проекты в TopbarModule (если есть метод loadProjects)
+            if (TopbarModule.loadProjects) TopbarModule.loadProjects();
+            // Обновляем дашборд и список проектов
+            if (TopbarModule.renderDashboard) TopbarModule.renderDashboard();
+            if (TopbarModule.renderProjectsList) TopbarModule.renderProjectsList();
         }
     }
 
