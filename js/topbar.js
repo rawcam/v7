@@ -379,6 +379,7 @@ const TopbarModule = (function() {
         renderProgressWidget();
         renderUrgentWidget();
         renderMeetingsWidget();
+        renderWorkloadWidget();
         renderProjectCards();
     }
 
