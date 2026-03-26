@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <!-- Раздел "Проекты" (исправлено) -->
+        <!-- Раздел "Проекты" -->
         <div id="projects" class="section-container">
             <div id="projectsContainer"></div>
             <div id="projectDetailContainer" style="display: none;"></div>
@@ -238,9 +238,24 @@
 <script src="js/logger.js"></script>
 <script src="js/sidebar-editor.js"></script>
 <script src="js/topbar.js"></script>
-<!-- Добавленные скрипты для управления проектами -->
 <script src="js/projects.js"></script>
 <script src="js/project-detail.js"></script>
 <script src="js/app.js"></script>
+
+<!-- Инициализация дашборда после полной загрузки -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Если функция updateDashboard определена, вызываем её
+        if (typeof updateDashboard === 'function') {
+            updateDashboard();
+        } else {
+            console.warn('updateDashboard not defined, check app.js');
+        }
+        // Если нужна карусель, можно инициализировать её здесь
+        if (typeof initProjectsCarousel === 'function') {
+            initProjectsCarousel();
+        }
+    });
+</script>
 </body>
 </html>
