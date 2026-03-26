@@ -1,4 +1,4 @@
-// topbar.js
+// topbar.js – полная версия с исправленными функциями
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -109,7 +109,6 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
-    // ========== ОБЩАЯ СТАТИСТИКА ==========
     function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
@@ -136,7 +135,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ (КАРТОЧКА) ==========
     function renderUrgentWidget() {
         const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
         const container = document.getElementById('urgentProjectsWidget');
@@ -164,7 +162,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТ ВСТРЕЧ (КАРТОЧКА) ==========
     function renderMeetingsWidget() {
         const allMeetings = [];
         projects.forEach(project => {
@@ -199,7 +196,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== КАРТОЧКИ АКТИВНЫХ ПРОЕКТОВ ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
@@ -246,10 +242,11 @@ const TopbarModule = (function() {
     }
 
     function renderDashboard() {
+        console.log('renderDashboard called');
         renderStatsCard();
-        renderProjectCards();
         renderUrgentWidget();
         renderMeetingsWidget();
+        renderProjectCards();
     }
 
     function createNewProject() {
@@ -281,7 +278,6 @@ const TopbarModule = (function() {
         renderDashboard();
     }
 
-    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
         console.log('switchToSection:', section);
         currentSection = section;
@@ -305,7 +301,6 @@ const TopbarModule = (function() {
         if (section === 'templates') renderTemplates();
     }
 
-    // ========== ПРОЕКТЫ (список) ==========
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -343,7 +338,6 @@ const TopbarModule = (function() {
         });
     }
 
-    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
