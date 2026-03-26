@@ -3,167 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Sputnik Studio v7.0</title>
-    
-    <!-- Подключение шрифтов и базовых стилей -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <title>Sputnik Studio v7.0 — AV Project Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Дополнительные стили для карусели и карточек (если нужны) -->
+    <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* Дополнительные стили для надёжности */
-        .section-container {
-            display: none;
+        /* Дополнительные стили для топбара и дашборда */
+        .sidebar.hidden { display: none; }
+        .main-content.full-width { max-width: 100%; margin-left: 0; }
+        .section-container { display: none; }
+        .section-container.active { display: block; }
+        .dashboard-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+        /* Сетка виджетов: 5 колонок на широких экранах */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 24px;
+            margin: 32px 0;
         }
-        #dashboard {
-            display: block; /* по умолчанию показываем дашборд, скрипт переключения возьмёт управление */
+        .dashboard-grid .project-card {
+            margin-bottom: 0;
         }
-        #projectsContainer, #projectDetailContainer {
-            transition: all 0.2s ease;
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
         }
-        .project-card {
-            background: var(--card-bg, #fff);
-            border-radius: 16px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+        .widget-section h3, .dashboard-wrapper h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .project-card button {
-            margin-right: 0.5rem;
+        .dashboard-wrapper h2 {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
         }
-        .topbar {
-            display: flex;
-            gap: 1rem;
-            background: var(--topbar-bg, #1e293b);
-            padding: 0.75rem 2rem;
-            color: white;
+
+        /* Обёртка для карусели, чтобы кнопки были за пределами 1400px */
+        .projects-swiper-wrapper {
+            position: relative;
+            margin: 0 -20px;
+            padding: 0 20px;
         }
-        .topbar-btn {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.2s;
+        .projects-swiper-wrapper .swiper-container {
+            overflow: visible;
         }
-        .topbar-btn.active {
-            background: #3b82f6;
-            color: white;
+        .projects-swiper-wrapper .swiper-button-prev,
+        .projects-swiper-wrapper .swiper-button-next {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-panel);
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .projects-swiper-wrapper .swiper-button-prev {
+            left: -20px;
+        }
+        .projects-swiper-wrapper .swiper-button-next {
+            right: -20px;
+        }
+        @media (max-width: 768px) {
+            .projects-swiper-wrapper {
+                margin: 0;
+                padding: 0;
+            }
+            .projects-swiper-wrapper .swiper-button-prev,
+            .projects-swiper-wrapper .swiper-button-next {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Топбар -->
-    <div class="topbar">
-        <button class="topbar-btn" data-section="dashboard">Главная</button>
+<div class="topbar">
+    <div class="topbar-logo"><i class="fas fa-satellite-dish"></i> Sputnik Studio</div>
+    <div class="topbar-nav" id="topbarNav">
+        <button class="topbar-btn active" data-section="dashboard">Главная</button>
         <button class="topbar-btn" data-section="projects">Проекты</button>
         <button class="topbar-btn" data-section="calculations">Расчёты</button>
         <button class="topbar-btn" data-section="templates">Шаблоны</button>
     </div>
+    <div class="topbar-actions">
+        <button id="topbarThemeSwitch" title="Тема"><i class="fas fa-sun"></i></button>
+        <button id="topbarSave" title="Сохранить"><i class="fas fa-save"></i></button>
+        <button id="topbarExport" title="Экспорт"><i class="fas fa-file-export"></i></button>
+    </div>
+</div>
+<div class="app-layout">
+    <!-- Сайдбар -->
+    <div class="sidebar hidden" id="sidebar">
+        <div class="sidebar-header">
+            <h2>SPUTNIK STUDIO</h2>
+            <div class="header-actions">
+                <div class="theme-switch" id="themeSwitch"><i class="fas fa-sun"></i></div>
+                <div class="collapse-btn" id="collapseSidebarBtn"><i class="fas fa-chevron-left"></i></div>
+            </div>
+        </div>
+        <div id="sidebarSectionsContainer">
+            <!-- ВСЕ АККОРДЕОНЫ (видео, сеть, LED, звук, ВКС, эргономика, тракты, статистика, энергия, управление) -->
+            <!-- ВСТАВЬТЕ СЮДА ВАШИ АККОРДЕОНЫ, КАК БЫЛО РАНЕЕ -->
+        </div>
+        <div class="sidebar-footer">Sputnik Studio v7.0<br>© 2026</div>
+    </div>
 
-    <!-- Основной контент -->
-    <main>
-        <!-- =================== СЕКЦИЯ ДАШБОРД =================== -->
-        <section id="dashboard" class="section-container">
-            <!-- Здесь разместите ваш реальный дашборд (как было на скриншоте) -->
-            <!-- Примерная структура, замените на свои данные -->
-            <div class="dashboard-content">
+    <div class="main-content" id="mainContent">
+        <!-- Дашборд (Главная) -->
+        <div id="dashboardContainer" class="section-container active">
+            <div class="dashboard-wrapper">
                 <h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">Всего проектов: <span id="totalProjects">0</span></div>
-                    <div class="stat-card">Активные: <span id="activeProjects">0</span></div>
-                    <div class="stat-card">Ожидают оплату: <span id="awaitingPayment">0</span></div>
-                    <div class="stat-card">Стадия Р: <span id="stageR">0</span></div>
-                    <div class="stat-card">Монтаж: <span id="installation">0</span></div>
-                    <div class="stat-card">Срочные: <span id="urgentProjects">0</span></div>
-                    <div class="stat-card">В архиве: <span id="archivedProjects">0</span></div>
+                <div class="stats-card" id="statsCard"></div>
+                <div class="dashboard-grid">
+                    <div class="project-card" id="budgetWidget"></div>
+                    <div class="project-card" id="progressWidget"></div>
+                    <div class="project-card" id="urgentProjectsWidget"></div>
+                    <div class="project-card" id="meetingsWidget"></div>
+                    <div class="project-card" id="workloadWidget"></div>
                 </div>
-                <div class="budget-progress">
-                    <div>Общий бюджет активных проектов: <strong id="totalBudget">0 ₽</strong></div>
-                    <div>Средний прогресс: <strong id="avgProgress">0%</strong></div>
-                </div>
-                <div class="urgent-list">
-                    <h3>Срочные проекты</h3>
-                    <ul id="urgentProjectsList"></ul>
-                </div>
-                <div class="meetings">
-                    <h3>Встречи</h3>
-                    <ul id="meetingsList"></ul>
-                </div>
-                <div class="employee-load">
-                    <h3>Загрузка сотрудников</h3>
-                    <div id="engineersLoad"></div>
-                    <div id="projectManagersLoad"></div>
-                </div>
-                <div class="active-projects-carousel">
+                <div class="widget-section">
                     <h3>Активные проекты</h3>
-                    <div class="swiper projects-carousel">
-                        <div class="swiper-wrapper" id="activeProjectsCarouselWrapper"></div>
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
+                    <div class="projects-swiper-wrapper">
+                        <div class="swiper-container" id="projectsSwiperContainer">
+                            <div class="swiper-wrapper" id="projectCardsContainer"></div>
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-pagination"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- =================== СЕКЦИЯ ПРОЕКТЫ =================== -->
-        <section id="projects" class="section-container">
-            <!-- Контейнеры для списка проектов и детальной страницы (БЕЗ класса section-container) -->
+        <!-- Раздел "Проекты" (исправлено) -->
+        <div id="projects" class="section-container">
             <div id="projectsContainer"></div>
             <div id="projectDetailContainer" style="display: none;"></div>
-        </section>
+        </div>
 
-        <!-- =================== СЕКЦИЯ РАСЧЁТЫ =================== -->
-        <section id="calculations" class="section-container">
-            <h2>Расчёты</h2>
-            <p>Здесь будут калькуляторы (звук, LED, камеры и т.д.)</p>
-        </section>
+        <!-- Контейнер для расчётов -->
+        <div id="calculationsContainer" class="section-container">
+            <div id="activePathContainer" class="active-path-container"></div>
+            <div id="allTractsContainer" style="display: none;"></div>
+            <div id="ergoCalculatorContainer" style="display: none;"></div>
+            <div id="soundCalculatorContainer" style="display: none;"></div>
+            <div id="ledCalculatorContainer" style="display: none;"></div>
+            <div id="vcCalculatorContainer" style="display: none;"></div>
+            <div id="powerCalculatorContainer" style="display: none;"></div>
+        </div>
 
-        <!-- =================== СЕКЦИЯ ШАБЛОНЫ =================== -->
-        <section id="templates" class="section-container">
-            <h2>Шаблоны документов</h2>
-            <p>Конструктор документов</p>
-        </section>
-    </main>
+        <!-- Шаблоны документов -->
+        <div id="templatesContainer" class="section-container">
+            <div class="dashboard-wrapper">
+                <h2>КОНСТРУКТОР ДОКУМЕНТОВ</h2>
+                <div class="template-builder">
+                    <div class="setting">
+                        <label>Выберите шаблон:</label>
+                        <select id="templateSelect">
+                            <option value="explanatory">Пояснительная записка</option>
+                            <option value="specification">Спецификация оборудования</option>
+                            <option value="act">Акт выполненных работ</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label>Подсистемы проекта:</label>
+                        <div id="subsystemsChecklist">
+                            <label><input type="checkbox" value="display"> Подсистема отображения</label>
+                            <label><input type="checkbox" value="vks"> ВКС</label>
+                            <label><input type="checkbox" value="sound"> Звукоусиление</label>
+                            <label><input type="checkbox" value="led"> LED-экраны</label>
+                            <label><input type="checkbox" value="control"> Управление</label>
+                        </div>
+                    </div>
+                    <div class="setting">
+                        <label>Привязать к проекту:</label>
+                        <select id="templateProjectSelect">
+                            <option value="">— Не привязывать —</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="generateDocBtn"><i class="fas fa-file-alt"></i> Сформировать документ</button>
+                    <div id="documentPreview" class="document-preview" style="margin-top: 24px; display: none;">
+                        <h3>Предварительный просмотр</h3>
+                        <div id="previewContent"></div>
+                        <button class="btn-secondary" id="copyDocBtn"><i class="fas fa-copy"></i> Копировать текст</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
 
-    <!-- Подключение библиотек -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    
-    <!-- Ваши скрипты (порядок важен) -->
-    <script src="state.js"></script>           <!-- глобальное состояние, если есть -->
-    <script src="topbar.js"></script>          <!-- исправленный topbar.js (из предыдущего сообщения) -->
-    <script src="projects.js"></script>        <!-- исправленный projects.js -->
-    <script src="project-detail.js"></script>  <!-- исправленный project-detail.js -->
-    <script src="dashboard.js"></script>       <!-- ваш скрипт для дашборда (должен содержать updateDashboard и инициализацию) -->
-    
-    <!-- Инициализация карусели (если не делается в dashboard.js) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Если dashboard.js уже инициализирует карусель, этот блок можно удалить
-            // Для надёжности проверим, не инициализирована ли уже
-            if (typeof initCarousel === 'undefined') {
-                // Простая инициализация Swiper, если контейнер существует
-                const swiperEl = document.querySelector('.projects-carousel');
-                if (swiperEl && typeof Swiper !== 'undefined') {
-                    new Swiper(swiperEl, {
-                        slidesPerView: 1,
-                        spaceBetween: 20,
-                        navigation: {
-                            nextEl: '.swiper-button-next',
-                            prevEl: '.swiper-button-prev',
-                        },
-                        breakpoints: {
-                            640: { slidesPerView: 2 },
-                            1024: { slidesPerView: 3 }
-                        }
-                    });
-                }
-            }
-        });
-    </script>
+<!-- Модальные окна -->
+<div id="addDeviceModal" class="modal">
+    <div class="modal-content">
+        <h3>Добавить устройство</h3>
+        <select id="deviceTypeSelect"></select>
+        <select id="deviceModelSelect"></select>
+        <div class="modal-buttons">
+            <button class="btn-primary" id="modalAddBtn">Добавить</button>
+            <button class="btn-secondary" id="modalCancelBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+<div id="resetModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" id="closeResetModal">&times;</span>
+        <h3>Сброс проекта</h3>
+        <p>Вы действительно хотите сбросить все данные? Текущий проект будет удалён.</p>
+        <div class="modal-buttons">
+            <button class="btn-primary" id="saveBeforeResetBtn">Сохранить проект</button>
+            <button class="btn-danger" id="confirmResetBtn">Сбросить без сохранения</button>
+            <button class="btn-secondary" id="cancelResetBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/accordion.js"></script>
+<script src="js/video.js"></script>
+<script src="js/network.js"></script>
+<script src="js/tracts.js"></script>
+<script src="js/led.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/vc.js"></script>
+<script src="js/ergo.js"></script>
+<script src="js/power.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/logger.js"></script>
+<script src="js/sidebar-editor.js"></script>
+<script src="js/topbar.js"></script>
+<!-- Добавленные скрипты для управления проектами -->
+<script src="js/projects.js"></script>
+<script src="js/project-detail.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
