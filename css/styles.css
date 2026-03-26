@@ -634,3 +634,82 @@ input:focus, select:focus, textarea:focus {
         align-items: stretch;
     }
 }
+/* Прогресс-бар */
+.project-progress-bar {
+    background: var(--card-bg);
+    border-radius: 20px;
+    height: 8px;
+    margin: 12px 0;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+}
+.project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 12px 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.project-meta i {
+    margin-right: 4px;
+    width: 16px;
+}
+.project-roadmap {
+    margin: 12px 0;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+}
+.roadmap-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.75rem;
+}
+.roadmap-status {
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+.roadmap-status.current {
+    background: var(--accent);
+    color: white;
+}
+.roadmap-status.next {
+    background: var(--card-bg);
+    color: var(--text-secondary);
+}
+.roadmap-arrow {
+    color: var(--text-secondary);
+}
+.roadmap-date {
+    color: var(--text-muted);
+}
+.priority-card {
+    border-left: 4px solid #f97316;
+}
+.priority-badge {
+    background: #f97316;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    margin-left: 8px;
+}
+.urgent-stat .stat-number {
+    color: #f97316;
+}
+.meetings-list, .purchases-list {
+    margin-top: 12px;
+}
+.meeting-item, .purchase-item {
+    font-size: 0.75rem;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--border-light);
+}
