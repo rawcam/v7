@@ -12,6 +12,7 @@
     StorageModule.init();
     LoggerModule.init();
     PowerModule.init();
+    SidebarEditor.init();
 
 // Обработчик кнопки
 document.getElementById('showPowerCalcBtn')?.addEventListener('click', () => {
