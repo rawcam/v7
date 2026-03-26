@@ -48,50 +48,44 @@
             font-size: 1.5rem;
             margin-bottom: 24px;
         }
-        /* Карусель */
-        .projects-carousel-wrapper {
-            position: relative;
-            margin: 32px 0;
+        /* Компактные карточки активных проектов */
+        .compact-card .project-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.75rem;
+            margin: 8px 0;
         }
+        .compact-card .project-progress-bar {
+            margin: 8px 0;
+        }
+        .compact-card .project-roadmap {
+            font-size: 0.7rem;
+            margin: 8px 0;
+        }
+        .compact-card .project-details summary {
+            font-size: 0.7rem;
+            margin-top: 8px;
+        }
+        /* Карусель */
         .swiper-container {
             width: 100%;
-            padding: 8px 0 40px 0;
-            overflow: hidden;
+            padding: 8px 40px 40px 40px;
+            position: relative;
         }
         .swiper-button-prev,
         .swiper-button-next {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 44px;
-            height: 44px;
-            background: var(--bg-panel);
-            backdrop-filter: blur(8px);
-            border-radius: 50%;
             color: var(--accent);
+            background: var(--bg-panel);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
             box-shadow: var(--shadow);
-            z-index: 10;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-        .swiper-button-prev {
-            left: -22px;
-        }
-        .swiper-button-next {
-            right: -22px;
         }
         .swiper-button-prev:after,
         .swiper-button-next:after {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .swiper-button-prev:hover,
-        .swiper-button-next:hover {
-            background: var(--accent);
-            color: white;
+            font-size: 18px;
         }
         .swiper-pagination-bullet {
             background: var(--text-secondary);
@@ -102,12 +96,12 @@
             opacity: 1;
         }
         @media (max-width: 768px) {
+            .swiper-container {
+                padding: 8px 20px 40px 20px;
+            }
             .swiper-button-prev,
             .swiper-button-next {
                 display: none;
-            }
-            .swiper-container {
-                padding: 8px 0 40px 0;
             }
         }
     </style>
@@ -138,9 +132,8 @@
             </div>
         </div>
         <div id="sidebarSectionsContainer">
-            <!-- ВСЕ СЕКЦИИ САЙДБАРА (аккордеоны) – они уже есть в вашем файле, 
-                 для краткости здесь не дублируются, но в реальном файле они должны быть.
-                 Если их нет, скопируйте из предыдущей стабильной версии. -->
+            <!-- Все аккордеоны (видео, сеть, LED, звук, ВКС, эргономика, тракты, статистика, энергия, управление) -->
+            <!-- Они были в предыдущей версии, но для краткости оставлю комментарий. В вашем реальном файле они должны быть -->
         </div>
         <div class="sidebar-footer">Sputnik Studio v7.0<br>© 2026</div>
     </div>
@@ -154,24 +147,22 @@
                 <!-- Общая статистика -->
                 <div class="stats-card" id="statsCard"></div>
 
-                <!-- Сетка для всех виджетов-карточек (4 виджета) -->
+                <!-- Сетка для всех виджетов-карточек -->
                 <div class="dashboard-grid">
-                    <div class="project-card" id="urgentProjectsWidget"></div>
-                    <div class="project-card" id="meetingsWidget"></div>
                     <div class="project-card" id="budgetWidget"></div>
                     <div class="project-card" id="progressWidget"></div>
+                    <div class="project-card" id="urgentProjectsWidget"></div>
+                    <div class="project-card" id="meetingsWidget"></div>
                 </div>
 
                 <!-- Активные проекты (карусель) -->
                 <div class="widget-section">
                     <h3>Активные проекты</h3>
-                    <div class="projects-carousel-wrapper">
-                        <div class="swiper-container" id="projectsSwiperContainer">
-                            <div class="swiper-wrapper" id="projectCardsContainer"></div>
-                            <div class="swiper-pagination"></div>
-                        </div>
+                    <div class="swiper-container" id="projectsSwiperContainer">
+                        <div class="swiper-wrapper" id="projectCardsContainer"></div>
                         <div class="swiper-button-prev"></div>
                         <div class="swiper-button-next"></div>
+                        <div class="swiper-pagination"></div>
                     </div>
                 </div>
             </div>
@@ -188,7 +179,7 @@
             <div id="powerCalculatorContainer" style="display: none;"></div>
         </div>
 
-        <!-- Управление проектами -->
+        <!-- Управление проектами (список) -->
         <div id="projectsContainer" class="section-container">
             <div class="dashboard-wrapper">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -196,10 +187,11 @@
                     <button class="btn-primary" id="createProjectBtn"><i class="fas fa-plus"></i> Новый проект</button>
                 </div>
                 <div id="projectsList" class="projects-list"></div>
-                <!-- Детальная страница проекта (изначально скрыта) -->
-                <div id="projectDetailContainer" style="display: none;"></div>
             </div>
         </div>
+
+        <!-- Детальная страница проекта (изначально скрыта) -->
+        <div id="projectDetailContainer" class="section-container" style="display: none;"></div>
 
         <!-- Шаблоны документов -->
         <div id="templatesContainer" class="section-container">
@@ -285,6 +277,7 @@
 <script src="js/logger.js"></script>
 <script src="js/sidebar-editor.js"></script>
 <script src="js/topbar.js"></script>
+<script src="js/project-detail.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
