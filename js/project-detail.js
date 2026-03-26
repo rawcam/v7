@@ -10,10 +10,13 @@ const ProjectDetail = (function() {
 
     function saveProjects(projects) {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
-        // Обновляем дашборд и список проектов
-        if (typeof TopbarModule !== 'undefined') {
-            if (TopbarModule.renderDashboard) TopbarModule.renderDashboard();
-            if (TopbarModule.renderProjectsList) TopbarModule.renderProjectsList();
+        // Обновляем дашборд
+        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderDashboard) {
+            TopbarModule.renderDashboard();
+        }
+        // Обновляем список проектов
+        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
+            TopbarModule.renderProjectsList();
         }
     }
 
@@ -70,16 +73,6 @@ const ProjectDetail = (function() {
         return next[status] || null;
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
     function renderDetail() {
         if (!currentProject) return;
         const container = document.getElementById('projectDetailContainer');
@@ -89,7 +82,7 @@ const ProjectDetail = (function() {
         const nextStatus = getNextStatusText(p.status);
 
         container.innerHTML = `
-            <div class="dashboard-wrapper" style="max-width: 800px; margin: 0 auto;">
+            <div style="max-width: 800px; margin: 0 auto;">
                 <button class="btn-secondary" id="backToProjectsBtn" style="margin-bottom: 20px;">
                     <i class="fas fa-arrow-left"></i> Назад к проектам
                 </button>
@@ -266,28 +259,43 @@ const ProjectDetail = (function() {
         currentProjectId = projectId;
         currentProject = findProject(projectId);
         if (!currentProject) return;
-        const projectsContainer = document.getElementById('projectsContainer');
+
+        const projectsList = document.getElementById('projectsList');
         const detailContainer = document.getElementById('projectDetailContainer');
-        if (projectsContainer && detailContainer) {
-            projectsContainer.style.display = 'none';
+        if (projectsList && detailContainer) {
+            projectsList.style.display = 'none';
             detailContainer.style.display = 'block';
             renderDetail();
         }
     }
 
     function hideDetail() {
-        const projectsContainer = document.getElementById('projectsContainer');
+        const projectsList = document.getElementById('projectsList');
         const detailContainer = document.getElementById('projectDetailContainer');
-        if (projectsContainer && detailContainer) {
+        if (projectsList && detailContainer) {
             detailContainer.style.display = 'none';
-            projectsContainer.style.display = 'block';
+            projectsList.style.display = 'block';
             currentProjectId = null;
             currentProject = null;
+            // обновляем список проектов (на случай, если были изменения)
+            if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
+                TopbarModule.renderProjectsList();
+            }
         }
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
     function init() {
-        // Обработчик для кликов по карточкам проектов (делегирование)
+        // Добавляем обработчики на карточки проектов (делегирование)
         document.addEventListener('click', (e) => {
             const card = e.target.closest('.project-card');
             if (card && card.closest('#projectsList')) {
