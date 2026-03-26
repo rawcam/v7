@@ -1287,3 +1287,12 @@ input:focus, select:focus, textarea:focus {
         text-align: right;
     }
 }
+.workload-name.clickable {
+    cursor: pointer;
+    transition: color 0.2s;
+    color: var(--accent);
+}
+.workload-name.clickable:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
