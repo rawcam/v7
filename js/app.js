@@ -2,8 +2,13 @@
 (function() {
     // Инициализация всех модулей
     if (typeof Accordion !== 'undefined') Accordion.init();
+    // Вместо прямого вызова VideoModule.init() и NetworkModule.init()
+setTimeout(() => {
     if (typeof VideoModule !== 'undefined') VideoModule.init();
     if (typeof NetworkModule !== 'undefined') NetworkModule.init();
+    if (typeof TractsModule !== 'undefined') TractsModule.init();
+    // ... остальные модули, которые работают с DOM
+}, 100);
     if (typeof TractsModule !== 'undefined') TractsModule.init();
     if (typeof LedModule !== 'undefined') LedModule.init();
     if (typeof SoundModule !== 'undefined') SoundModule.init();
