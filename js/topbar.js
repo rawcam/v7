@@ -337,6 +337,81 @@ const TopbarModule = (function() {
         initProjectsSwiper();
     }
 
+        function showProjectsModal(person, role) {
+    // Собираем проекты, где person указан в нужной роли и статус не "done"
+    const filteredProjects = projects.filter(p => {
+        if (role === 'engineer') return p.engineer === person && p.status !== 'done';
+        if (role === 'manager') return p.projectManager === person && p.status !== 'done';
+        return false;
+    });
+
+    if (filteredProjects.length === 0) {
+        alert(`У ${person} нет активных проектов.`);
+        return;
+    }
+
+    // Формируем HTML модального окна
+    const modalHtml = `
+        <div class="modal" id="projectsModal" style="display: flex;">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="modal-close" id="closeModalBtn">&times;</span>
+                <h3>Проекты (${role === 'engineer' ? 'инженер' : 'руководитель'}) — ${escapeHtml(person)}</h3>
+                <div style="max-height: 60vh; overflow-y: auto;">
+                    <table style="width:100%; margin-top:16px;">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Статус</th>
+                                <th>Прогресс</th>
+                                <th>Начало</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredProjects.map(p => `
+                                <tr style="cursor:pointer;" class="project-row" data-id="${p.id}">
+                                    <td>${escapeHtml(p.name)}</td>
+                                    <td>${getStatusText(p.status)}</td>
+                                    <td>${p.progress}%</td>
+                                    <td>${p.startDate}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-primary" id="closeModalBtn2">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Добавляем модальное окно в DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer);
+
+    const modal = modalContainer.querySelector('.modal');
+    const closeModal = () => modal.remove();
+
+    modal.querySelector('#closeModalBtn').addEventListener('click', closeModal);
+    modal.querySelector('#closeModalBtn2').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // При клике на строку проекта открываем детальную страницу
+    modal.querySelectorAll('.project-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const id = row.dataset.id;
+            if (id && typeof ProjectDetail !== 'undefined') {
+                closeModal();
+                // Переключаемся на раздел проектов и открываем детальную страницу
+                if (typeof TopbarModule !== 'undefined' && TopbarModule.switchToSection) {
+                    TopbarModule.switchToSection('projects');
+                }
+                ProjectDetail.showDetail(id);
+            }
+        });
+    });
+}
     function initProjectsSwiper() {
         if (projectsSwiper) projectsSwiper.destroy(true, true);
         const container = document.getElementById('projectsSwiperContainer');
