@@ -503,3 +503,100 @@ body {
 .calc-card, .stat-card, .project-card {
     animation: fadeInUp 0.4s ease-out;
 }
+/* ========== КОМПАКТНЫЙ САЙДБАР ========== */
+.sidebar.collapsed .section-header span,
+.sidebar.collapsed .section-header i:first-child + span {
+    display: none;
+}
+.sidebar.collapsed .section-header i:first-child {
+    margin-right: 0;
+}
+.sidebar.collapsed .section-header {
+    justify-content: center;
+    padding: 12px 0;
+}
+.sidebar.collapsed .section-content {
+    display: none;
+}
+.sidebar.collapsed .sidebar-header h2 {
+    display: none;
+}
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 16px 8px;
+}
+.sidebar.collapsed .paths-list li .path-name {
+    display: none;
+}
+.sidebar.collapsed .paths-list li {
+    justify-content: center;
+    padding: 4px;
+}
+.sidebar.collapsed .paths-list li .path-actions {
+    display: flex;
+}
+.sidebar.collapsed .widget-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.sidebar.collapsed .widget-label span {
+    display: none;
+}
+.sidebar.collapsed .manage-buttons button span {
+    display: none;
+}
+.sidebar.collapsed .manage-buttons button {
+    justify-content: center;
+    padding: 6px 0;
+}
+.sidebar.collapsed .tracts-actions button span {
+    display: none;
+}
+.sidebar.collapsed .tracts-actions button {
+    justify-content: center;
+    padding: 6px 0;
+    width: 100%;
+}
+.sidebar.collapsed .add-path-btn span {
+    display: none;
+}
+.sidebar.collapsed .add-path-btn {
+    justify-content: center;
+    padding: 6px 0;
+    width: 100%;
+}
+.sidebar.collapsed .setting {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+.sidebar.collapsed .setting select,
+.sidebar.collapsed .setting input {
+    width: 100%;
+}
+.sidebar.collapsed .sidebar-footer {
+    display: none; /* скрываем футер в компактном режиме, чтобы не занимал место */
+}
+
+/* ========== ФУТЕР САЙДБАРА ========== */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 12px;
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    text-align: center;
+    border-top: 1px solid var(--border-light);
+    font-family: inherit;
+    letter-spacing: 0.3px;
+}
+
+/* Убедимся, что футер всегда внизу сайдбара */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+}
+#sidebarSectionsContainer {
+    flex: 1;
+    overflow-y: auto;
+}
