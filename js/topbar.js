@@ -5,6 +5,7 @@ const TopbarModule = (function() {
 
     console.log('topbar.js loaded');
 
+    // ========== ПРОЕКТЫ ==========
     function loadProjects() {
         const saved = localStorage.getItem('sputnik_projects');
         if (saved) {
@@ -40,6 +41,7 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== ДАШБОРД ==========
     function renderDashboard() {
         const projectsCountEl = document.getElementById('dashboardProjectsCount');
         const avgProgressEl = document.getElementById('dashboardAvgProgress');
@@ -77,6 +79,7 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== ПРОЕКТЫ (список) ==========
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -113,6 +116,7 @@ const TopbarModule = (function() {
         `).join('');
         if (!projects.length) container.innerHTML = '<div class="empty-state">Нет проектов. Нажмите "Новый проект".</div>';
 
+        // Обработчики (упрощённо, чтобы не дублировать)
         document.querySelectorAll('.edit-project').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
@@ -132,7 +136,7 @@ const TopbarModule = (function() {
             });
         });
         document.querySelectorAll('.project-status-select').forEach(sel => {
-            sel.addEventListener('change', (e) => {
+            sel.addEventListener('change', () => {
                 const id = sel.dataset.id;
                 const project = projects.find(p => p.id === id);
                 if (project) project.status = sel.value;
@@ -141,7 +145,7 @@ const TopbarModule = (function() {
             });
         });
         document.querySelectorAll('.project-progress-input').forEach(inp => {
-            inp.addEventListener('change', (e) => {
+            inp.addEventListener('change', () => {
                 const id = inp.dataset.id;
                 const project = projects.find(p => p.id === id);
                 if (project) project.progress = parseInt(inp.value) || 0;
@@ -150,7 +154,7 @@ const TopbarModule = (function() {
             });
         });
         document.querySelectorAll('.project-date-input').forEach(inp => {
-            inp.addEventListener('change', (e) => {
+            inp.addEventListener('change', () => {
                 const id = inp.dataset.id;
                 const project = projects.find(p => p.id === id);
                 if (project) project.date = inp.value;
@@ -158,7 +162,7 @@ const TopbarModule = (function() {
             });
         });
         document.querySelectorAll('.project-team-input').forEach(inp => {
-            inp.addEventListener('change', (e) => {
+            inp.addEventListener('change', () => {
                 const id = inp.dataset.id;
                 const project = projects.find(p => p.id === id);
                 if (project) project.team = inp.value.split(',').map(s => s.trim()).filter(s => s);
@@ -215,6 +219,7 @@ const TopbarModule = (function() {
         }
     }
 
+    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
@@ -270,22 +275,35 @@ const TopbarModule = (function() {
         if (previewDiv && previewContent) {
             previewContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace;">${escapeHtml(content)}</pre>`;
             previewDiv.style.display = 'block';
-            document.getElementById('copyDocBtn').onclick = () => {
+            const copyBtn = document.getElementById('copyDocBtn');
+            if (copyBtn) copyBtn.onclick = () => {
                 navigator.clipboard.writeText(content);
                 alert('Текст скопирован');
             };
         }
     }
 
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
         console.log('switchToSection:', section);
         currentSection = section;
+        // Активная кнопка в топбаре
         document.querySelectorAll('.topbar-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.section === section);
+            if (btn.dataset.section === section) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         });
+        // Показываем нужный контейнер
         document.querySelectorAll('.section-container').forEach(container => {
-            container.classList.toggle('active', container.id === `${section}Container`);
+            if (container.id === `${section}Container`) {
+                container.classList.add('active');
+            } else {
+                container.classList.remove('active');
+            }
         });
+        // Скрываем/показываем сайдбар
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.querySelector('.main-content');
         if (section === 'calculations') {
@@ -295,6 +313,7 @@ const TopbarModule = (function() {
             if (sidebar) sidebar.classList.add('hidden');
             if (mainContent) mainContent.classList.add('full-width');
         }
+        // Рендерим содержимое
         if (section === 'dashboard') renderDashboard();
         if (section === 'projects') renderProjectsList();
         if (section === 'templates') renderTemplates();
@@ -319,6 +338,7 @@ const TopbarModule = (function() {
         const generateBtn = document.getElementById('generateDocBtn');
         if (generateBtn) generateBtn.addEventListener('click', generateDocument);
 
+        // По умолчанию показываем дашборд
         switchToSection('dashboard');
     }
 
