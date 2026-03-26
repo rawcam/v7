@@ -418,6 +418,53 @@ const TopbarModule = (function() {
 
         switchToSection('dashboard');
     }
+// topbar.js – добавить в конец файла перед return { init }
 
+function renderBudgetWidget() {
+    const activeProjects = projects.filter(p => p.status !== 'done');
+    const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+    const container = document.getElementById('budgetWidget');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="project-header">
+            <div class="project-name">Общий бюджет</div>
+        </div>
+        <div class="budget-value" style="font-size: 1.5rem; font-weight: 700; text-align: center; margin: 16px 0;">
+            ${formatCurrency(totalBudget)}
+        </div>
+        <div class="budget-note" style="font-size: 0.7rem; text-align: center; color: var(--text-secondary);">
+            по активным проектам
+        </div>
+    `;
+}
+
+function renderProgressWidget() {
+    const activeProjects = projects.filter(p => p.status !== 'done');
+    const avgProgress = activeProjects.length
+        ? Math.round(activeProjects.reduce((sum, p) => sum + p.progress, 0) / activeProjects.length)
+        : 0;
+    const container = document.getElementById('progressWidget');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="project-header">
+            <div class="project-name">Средний прогресс</div>
+        </div>
+        <div class="progress-value" style="font-size: 2rem; font-weight: 700; text-align: center; margin: 16px 0;">
+            ${avgProgress}%
+        </div>
+        <div class="progress-bar" style="background: var(--card-bg); border-radius: 20px; height: 8px; margin-top: 8px;">
+            <div style="width: ${avgProgress}%; height: 100%; background: var(--accent); border-radius: 20px;"></div>
+        </div>
+    `;
+}
+
+function renderDashboard() {
+    renderStatsCard();
+    renderUrgentWidget();
+    renderMeetingsWidget();
+    renderBudgetWidget();
+    renderProgressWidget();
+    renderProjectCards();
+}
     return { init };
 })();
