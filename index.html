@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Sputnik Studio v7.0 — AV Project Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         /* Дополнительные стили для топбара и дашборда */
         .sidebar.hidden {
@@ -67,6 +67,43 @@
             font-size: 0.7rem;
             margin-top: 8px;
         }
+        /* Стили для карусели */
+        .swiper-container {
+            width: 100%;
+            padding: 8px 40px 40px 40px;
+            position: relative;
+        }
+        .swiper-button-prev,
+        .swiper-button-next {
+            color: var(--accent);
+            background: var(--bg-panel);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+            box-shadow: var(--shadow);
+        }
+        .swiper-button-prev:after,
+        .swiper-button-next:after {
+            font-size: 18px;
+        }
+        .swiper-pagination-bullet {
+            background: var(--text-secondary);
+            opacity: 0.5;
+        }
+        .swiper-pagination-bullet-active {
+            background: var(--accent);
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            .swiper-container {
+                padding: 8px 20px 40px 20px;
+            }
+            .swiper-button-prev,
+            .swiper-button-next {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -95,8 +132,8 @@
             </div>
         </div>
         <div id="sidebarSectionsContainer">
-            <!-- Все секции сайдбара (видео, сеть, LED, звук, ВКС, эргономика, тракты, статистика, энергия, управление) -->
-            <!-- В вашем реальном файле они уже должны быть, поэтому здесь оставлено кратко -->
+            <!-- Здесь находятся все аккордеоны (видео, сеть, LED, звук, ВКС, эргономика, тракты, статистика, энергия, управление) -->
+            <!-- Для краткости они не дублируются, но в реальном файле должны быть. Если их нет, скопируйте из стабильной версии. -->
         </div>
         <div class="sidebar-footer">Sputnik Studio v7.0<br>© 2026</div>
     </div>
@@ -112,21 +149,28 @@
 
                 <!-- Сетка для всех виджетов-карточек -->
                 <div class="dashboard-grid">
+                    <!-- Срочные проекты -->
                     <div class="project-card" id="urgentProjectsWidget"></div>
+                    <!-- Встречи -->
                     <div class="project-card" id="meetingsWidget"></div>
+                    <!-- Общий бюджет -->
                     <div class="project-card" id="budgetWidget"></div>
+                    <!-- Средний прогресс -->
                     <div class="project-card" id="progressWidget"></div>
                 </div>
 
                 <!-- Активные проекты (карусель) -->
-                <div class="projects-carousel-wrapper">
+                <div class="widget-section">
+                    <h3>Активные проекты</h3>
                     <div class="swiper-container" id="projectsSwiperContainer">
                         <div class="swiper-wrapper" id="projectCardsContainer"></div>
                         <div class="swiper-button-prev"></div>
                         <div class="swiper-button-next"></div>
                         <div class="swiper-pagination"></div>
                     </div>
+                </div>
             </div>
+        </div>
 
         <!-- Контейнер для расчётов (в нём будет отображаться текущий калькулятор/тракты) -->
         <div id="calculationsContainer" class="section-container">
@@ -142,7 +186,7 @@
         <!-- Управление проектами -->
         <div id="projectsContainer" class="section-container">
             <div class="dashboard-wrapper">
-                <h2>УПРАВЛЕНИЕ ПРОЕКТАМИ</h2>
+                <h2 style="text-align: center;">УПРАВЛЕНИЕ ПРОЕКТАМИ</h2>
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
                     <button class="btn-primary" id="createProjectBtn"><i class="fas fa-plus"></i> Новый проект</button>
                 </div>
@@ -153,7 +197,7 @@
         <!-- Шаблоны документов -->
         <div id="templatesContainer" class="section-container">
             <div class="dashboard-wrapper">
-                <h2>КОНСТРУКТОР ДОКУМЕНТОВ</h2>
+                <h2 style="text-align: center;">КОНСТРУКТОР ДОКУМЕНТОВ</h2>
                 <div class="template-builder">
                     <div class="setting">
                         <label>Выберите шаблон:</label>
