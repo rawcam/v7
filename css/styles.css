@@ -911,3 +911,15 @@ input:focus, select:focus, textarea:focus {
     display: inline-block;
     width: 100%;
 }
+.template-builder {
+    background: var(--bg-panel);
+    backdrop-filter: blur(12px);
+    border-radius: 32px;
+    padding: 28px;
+    border: 1px solid var(--border-light);
+    transition: var(--transition);
+}
+.template-builder:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
