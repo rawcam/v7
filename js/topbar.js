@@ -86,8 +86,6 @@ const TopbarModule = (function() {
 
     function saveProjects() {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
-        renderDashboard();
-        renderProjectsList();
     }
 
     function getStatusText(status) {
@@ -112,6 +110,7 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
+    // ========== ОБЩАЯ СТАТИСТИКА ==========
     function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
@@ -138,6 +137,7 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== ВИДЖЕТЫ ==========
     function renderBudgetWidget() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
@@ -206,89 +206,182 @@ const TopbarModule = (function() {
                 });
             }
         });
-
-  function renderWorkloadWidget() {
-    // Собираем данные
-    const engineers = {};
-    const managers = {};
-
-    projects.forEach(project => {
-        const isActive = project.status !== 'done';
-        if (project.engineer && isActive) {
-            engineers[project.engineer] = (engineers[project.engineer] || 0) + 1;
-        }
-        if (project.projectManager && isActive) {
-            managers[project.projectManager] = (managers[project.projectManager] || 0) + 1;
-        }
-    });
-
-    const maxEngineerLoad = Math.max(...Object.values(engineers), 1);
-    const maxManagerLoad = Math.max(...Object.values(managers), 1);
-
-    // Формируем HTML с атрибутами data-person и data-role
-    let engineersHtml = '';
-    for (const [name, count] of Object.entries(engineers).sort((a,b) => b[1] - a[1])) {
-        const percent = (count / maxEngineerLoad) * 100;
-        engineersHtml += `
-            <div class="workload-item">
-                <span class="workload-name clickable" data-person="${escapeHtml(name)}" data-role="engineer">${escapeHtml(name)}</span>
-                <span class="workload-count">${count} проект(ов)</span>
-                <div class="progress-bar-container small">
-                    <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
-                </div>
+        allMeetings.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const upcoming = allMeetings.slice(0, 3);
+        const totalMeetings = allMeetings.length;
+        const container = document.getElementById('meetingsWidget');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Встречи</div>
+                <div class="project-status">${totalMeetings}</div>
             </div>
-        `;
-    }
-    let managersHtml = '';
-    for (const [name, count] of Object.entries(managers).sort((a,b) => b[1] - a[1])) {
-        const percent = (count / maxManagerLoad) * 100;
-        managersHtml += `
-            <div class="workload-item">
-                <span class="workload-name clickable" data-person="${escapeHtml(name)}" data-role="manager">${escapeHtml(name)}</span>
-                <span class="workload-count">${count} проект(ов)</span>
-                <div class="progress-bar-container small">
-                    <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
+            ${upcoming.map(m => `
+                <div class="meeting-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border-light);">
+                    <span class="meeting-date">${m.date}</span>
+                    <span class="meeting-subject">${escapeHtml(m.subject)}</span>
+                    <span class="meeting-project">${escapeHtml(m.projectName)}</span>
                 </div>
-            </div>
+            `).join('')}
+            ${upcoming.length === 0 ? '<div class="empty-state">Нет предстоящих встреч</div>' : ''}
         `;
     }
 
-    const totalActive = projects.filter(p => p.status !== 'done').length;
-    const avgEngineerLoad = Object.values(engineers).length ? (Object.values(engineers).reduce((a,b) => a+b,0) / Object.values(engineers).length).toFixed(1) : 0;
-    const avgManagerLoad = Object.values(managers).length ? (Object.values(managers).reduce((a,b) => a+b,0) / Object.values(managers).length).toFixed(1) : 0;
+    // ========== ВИДЖЕТ ЗАГРУЗКИ СОТРУДНИКОВ ==========
+    function renderWorkloadWidget() {
+        const engineers = {};
+        const managers = {};
 
-    const container = document.getElementById('workloadWidget');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="project-header">
-            <div class="project-name">Загрузка сотрудников</div>
-        </div>
-        <div class="workload-stats">
-            <div class="stat-summary">Активных проектов: <strong>${totalActive}</strong></div>
-            <div class="stat-summary">Средняя загрузка инженеров: <strong>${avgEngineerLoad}</strong> проект(ов)</div>
-            <div class="stat-summary">Средняя загрузка РП: <strong>${avgManagerLoad}</strong> проект(ов)</div>
-        </div>
-        <details class="workload-details">
-            <summary>Инженеры</summary>
-            <div class="workload-list">${engineersHtml || '<div>Нет активных проектов</div>'}</div>
-        </details>
-        <details class="workload-details">
-            <summary>Руководители проектов</summary>
-            <div class="workload-list">${managersHtml || '<div>Нет активных проектов</div>'}</div>
-        </details>
-    `;
-
-    // Добавляем обработчики кликов на имена
-    document.querySelectorAll('.workload-name.clickable').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const person = el.dataset.person;
-            const role = el.dataset.role;
-            showProjectsModal(person, role);
+        projects.forEach(project => {
+            const isActive = project.status !== 'done';
+            if (project.engineer && isActive) {
+                engineers[project.engineer] = (engineers[project.engineer] || 0) + 1;
+            }
+            if (project.projectManager && isActive) {
+                managers[project.projectManager] = (managers[project.projectManager] || 0) + 1;
+            }
         });
-    });
-}
+
+        const maxEngineerLoad = Math.max(...Object.values(engineers), 1);
+        const maxManagerLoad = Math.max(...Object.values(managers), 1);
+
+        let engineersHtml = '';
+        for (const [name, count] of Object.entries(engineers).sort((a,b) => b[1] - a[1])) {
+            const percent = (count / maxEngineerLoad) * 100;
+            engineersHtml += `
+                <div class="workload-item">
+                    <span class="workload-name clickable" data-person="${escapeHtml(name)}" data-role="engineer">${escapeHtml(name)}</span>
+                    <span class="workload-count">${count} проект(ов)</span>
+                    <div class="progress-bar-container small">
+                        <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
+                    </div>
+                </div>
+            `;
+        }
+        let managersHtml = '';
+        for (const [name, count] of Object.entries(managers).sort((a,b) => b[1] - a[1])) {
+            const percent = (count / maxManagerLoad) * 100;
+            managersHtml += `
+                <div class="workload-item">
+                    <span class="workload-name clickable" data-person="${escapeHtml(name)}" data-role="manager">${escapeHtml(name)}</span>
+                    <span class="workload-count">${count} проект(ов)</span>
+                    <div class="progress-bar-container small">
+                        <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const totalActive = projects.filter(p => p.status !== 'done').length;
+        const avgEngineerLoad = Object.values(engineers).length ? (Object.values(engineers).reduce((a,b) => a+b,0) / Object.values(engineers).length).toFixed(1) : 0;
+        const avgManagerLoad = Object.values(managers).length ? (Object.values(managers).reduce((a,b) => a+b,0) / Object.values(managers).length).toFixed(1) : 0;
+
+        const container = document.getElementById('workloadWidget');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Загрузка сотрудников</div>
+            </div>
+            <div class="workload-stats">
+                <div class="stat-summary">Активных проектов: <strong>${totalActive}</strong></div>
+                <div class="stat-summary">Средняя загрузка инженеров: <strong>${avgEngineerLoad}</strong> проект(ов)</div>
+                <div class="stat-summary">Средняя загрузка РП: <strong>${avgManagerLoad}</strong> проект(ов)</div>
+            </div>
+            <details class="workload-details">
+                <summary>Инженеры</summary>
+                <div class="workload-list">${engineersHtml || '<div>Нет активных проектов</div>'}</div>
+            </details>
+            <details class="workload-details">
+                <summary>Руководители проектов</summary>
+                <div class="workload-list">${managersHtml || '<div>Нет активных проектов</div>'}</div>
+            </details>
+        `;
+
+        // Обработчики кликов на имена
+        document.querySelectorAll('.workload-name.clickable').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const person = el.dataset.person;
+                const role = el.dataset.role;
+                showProjectsModal(person, role);
+            });
+        });
+    }
+
+    // Модальное окно со списком проектов сотрудника
+    function showProjectsModal(person, role) {
+        const filteredProjects = projects.filter(p => {
+            if (role === 'engineer') return p.engineer === person && p.status !== 'done';
+            if (role === 'manager') return p.projectManager === person && p.status !== 'done';
+            return false;
+        });
+
+        if (filteredProjects.length === 0) {
+            alert(`У ${person} нет активных проектов.`);
+            return;
+        }
+
+        const modalHtml = `
+            <div class="modal" id="projectsModal" style="display: flex;">
+                <div class="modal-content" style="max-width: 600px;">
+                    <span class="modal-close" id="closeModalBtn">&times;</span>
+                    <h3>Проекты (${role === 'engineer' ? 'инженер' : 'руководитель'}) — ${escapeHtml(person)}</h3>
+                    <div style="max-height: 60vh; overflow-y: auto;">
+                        <table style="width:100%; margin-top:16px;">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Статус</th>
+                                    <th>Прогресс</th>
+                                    <th>Начало</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filteredProjects.map(p => `
+                                    <tr style="cursor:pointer;" class="project-row" data-id="${p.id}">
+                                        <td>${escapeHtml(p.name)}</td>
+                                        <td>${getStatusText(p.status)}</td>
+                                        <td>${p.progress}%</td>
+                                        <td>${p.startDate}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="btn-primary" id="closeModalBtn2">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+
+        const modal = modalContainer.querySelector('.modal');
+        const closeModal = () => modal.remove();
+
+        modal.querySelector('#closeModalBtn').addEventListener('click', closeModal);
+        modal.querySelector('#closeModalBtn2').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        modal.querySelectorAll('.project-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const id = row.dataset.id;
+                if (id && typeof ProjectDetail !== 'undefined') {
+                    closeModal();
+                    if (typeof TopbarModule !== 'undefined' && TopbarModule.switchToSection) {
+                        TopbarModule.switchToSection('projects');
+                    }
+                    ProjectDetail.showDetail(id);
+                }
+            });
+        });
+    }
+
+    // ========== АКТИВНЫЕ ПРОЕКТЫ (КАРУСЕЛЬ) ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
@@ -337,81 +430,6 @@ const TopbarModule = (function() {
         initProjectsSwiper();
     }
 
-        function showProjectsModal(person, role) {
-    // Собираем проекты, где person указан в нужной роли и статус не "done"
-    const filteredProjects = projects.filter(p => {
-        if (role === 'engineer') return p.engineer === person && p.status !== 'done';
-        if (role === 'manager') return p.projectManager === person && p.status !== 'done';
-        return false;
-    });
-
-    if (filteredProjects.length === 0) {
-        alert(`У ${person} нет активных проектов.`);
-        return;
-    }
-
-    // Формируем HTML модального окна
-    const modalHtml = `
-        <div class="modal" id="projectsModal" style="display: flex;">
-            <div class="modal-content" style="max-width: 600px;">
-                <span class="modal-close" id="closeModalBtn">&times;</span>
-                <h3>Проекты (${role === 'engineer' ? 'инженер' : 'руководитель'}) — ${escapeHtml(person)}</h3>
-                <div style="max-height: 60vh; overflow-y: auto;">
-                    <table style="width:100%; margin-top:16px;">
-                        <thead>
-                            <tr>
-                                <th>Название</th>
-                                <th>Статус</th>
-                                <th>Прогресс</th>
-                                <th>Начало</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filteredProjects.map(p => `
-                                <tr style="cursor:pointer;" class="project-row" data-id="${p.id}">
-                                    <td>${escapeHtml(p.name)}</td>
-                                    <td>${getStatusText(p.status)}</td>
-                                    <td>${p.progress}%</td>
-                                    <td>${p.startDate}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-buttons">
-                    <button class="btn-primary" id="closeModalBtn2">Закрыть</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Добавляем модальное окно в DOM
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHtml;
-    document.body.appendChild(modalContainer);
-
-    const modal = modalContainer.querySelector('.modal');
-    const closeModal = () => modal.remove();
-
-    modal.querySelector('#closeModalBtn').addEventListener('click', closeModal);
-    modal.querySelector('#closeModalBtn2').addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-    // При клике на строку проекта открываем детальную страницу
-    modal.querySelectorAll('.project-row').forEach(row => {
-        row.addEventListener('click', () => {
-            const id = row.dataset.id;
-            if (id && typeof ProjectDetail !== 'undefined') {
-                closeModal();
-                // Переключаемся на раздел проектов и открываем детальную страницу
-                if (typeof TopbarModule !== 'undefined' && TopbarModule.switchToSection) {
-                    TopbarModule.switchToSection('projects');
-                }
-                ProjectDetail.showDetail(id);
-            }
-        });
-    });
-}
     function initProjectsSwiper() {
         if (projectsSwiper) projectsSwiper.destroy(true, true);
         const container = document.getElementById('projectsSwiperContainer');
@@ -436,47 +454,18 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== ДАШБОРД ==========
     function renderDashboard() {
         renderStatsCard();
         renderBudgetWidget();
         renderProgressWidget();
         renderUrgentWidget();
         renderMeetingsWidget();
-        renderWorkloadWidget();
+        renderWorkloadWidget();   // новый виджет
         renderProjectCards();
     }
 
-    function createNewProject() {
-        const name = prompt('Название проекта:');
-        if (!name) return;
-        const budget = prompt('Бюджет проекта (в рублях):');
-        const engineer = prompt('Инженер проекта:');
-        const projectManager = prompt('Руководитель проекта (РП):');
-        const today = new Date().toISOString().slice(0,10);
-        const nextWeek = new Date(Date.now() + 7*86400000).toISOString().slice(0,10);
-        const newProject = {
-            id: Date.now().toString(),
-            name: name,
-            status: 'presale',
-            statusStartDate: today,
-            nextStatus: 'design',
-            nextStatusDate: nextWeek,
-            progress: 10,
-            startDate: today,
-            budget: parseInt(budget) || 0,
-            engineer: engineer || '',
-            projectManager: projectManager || '',
-            priority: false,
-            meetings: [],
-            purchases: []
-        };
-        projects.push(newProject);
-        saveProjects(); // сохраняет и обновляет дашборд
-        if (typeof ProjectDetail !== 'undefined') {
-            ProjectDetail.showDetail(newProject.id);
-        }
-    }
-
+    // ========== УПРАВЛЕНИЕ ПРОЕКТАМИ ==========
     function renderProjectsList() {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -512,11 +501,46 @@ const TopbarModule = (function() {
                 if (confirm('Удалить проект?')) {
                     projects = projects.filter(p => p.id !== id);
                     saveProjects();
+                    renderDashboard();
+                    renderProjectsList();
                 }
             });
         });
     }
 
+    function createNewProject() {
+        const name = prompt('Название проекта:');
+        if (!name) return;
+        const budget = prompt('Бюджет проекта (в рублях):');
+        const engineer = prompt('Инженер проекта:');
+        const projectManager = prompt('Руководитель проекта (РП):');
+        const today = new Date().toISOString().slice(0,10);
+        const nextWeek = new Date(Date.now() + 7*86400000).toISOString().slice(0,10);
+        const newProject = {
+            id: Date.now().toString(),
+            name: name,
+            status: 'presale',
+            statusStartDate: today,
+            nextStatus: 'design',
+            nextStatusDate: nextWeek,
+            progress: 10,
+            startDate: today,
+            budget: parseInt(budget) || 0,
+            engineer: engineer || '',
+            projectManager: projectManager || '',
+            priority: false,
+            meetings: [],
+            purchases: []
+        };
+        projects.push(newProject);
+        saveProjects();
+        renderDashboard();
+        if (typeof ProjectDetail !== 'undefined') {
+            ProjectDetail.showDetail(newProject.id);
+        }
+    }
+
+    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
@@ -580,51 +604,50 @@ const TopbarModule = (function() {
         }
     }
 
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
-    console.log('switchToSection:', section);
-    currentSection = section;
-    document.querySelectorAll('.topbar-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.section === section);
-    });
-    document.querySelectorAll('.section-container').forEach(container => {
-        container.classList.toggle('active', container.id === `${section}Container`);
-    });
+        console.log('switchToSection:', section);
+        currentSection = section;
+        document.querySelectorAll('.topbar-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.section === section);
+        });
+        document.querySelectorAll('.section-container').forEach(container => {
+            container.classList.toggle('active', container.id === `${section}Container`);
+        });
 
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.querySelector('.main-content');
-    if (section === 'calculations') {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (mainContent) mainContent.classList.remove('full-width');
-    } else {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('full-width');
-    }
-
-    // ========== ПРАВКИ: СКРЫВАЕМ ПРОЕКТЫ ПРИ УХОДЕ ==========
-    const projectsContainer = document.getElementById('projectsContainer');
-    const detailContainer = document.getElementById('projectDetailContainer');
-    const projectsList = document.getElementById('projectsList');
-
-    if (section !== 'projects') {
-        // Скрываем контейнеры проектов и детальную страницу
-        if (projectsContainer) projectsContainer.style.display = 'none';
-        if (detailContainer) detailContainer.style.display = 'none';
-        // Если детальная страница открыта, вызываем её метод hideDetail
-        if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
-            ProjectDetail.hideDetail();
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        if (section === 'calculations') {
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (mainContent) mainContent.classList.remove('full-width');
+        } else {
+            if (sidebar) sidebar.classList.add('hidden');
+            if (mainContent) mainContent.classList.add('full-width');
         }
-        // Убедимся, что список проектов не остался видимым
-        if (projectsList) projectsList.style.display = '';
-    } else {
-        // При входе в раздел проектов показываем список и скрываем детальную
-        if (projectsContainer) projectsContainer.style.display = 'block';
-        if (detailContainer) detailContainer.style.display = 'none';
-        renderProjectsList();
+
+        // Скрываем контейнеры проектов при уходе из раздела
+        const projectsContainer = document.getElementById('projectsContainer');
+        const detailContainer = document.getElementById('projectDetailContainer');
+        const projectsList = document.getElementById('projectsList');
+
+        if (section !== 'projects') {
+            if (projectsContainer) projectsContainer.style.display = 'none';
+            if (detailContainer) detailContainer.style.display = 'none';
+            if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
+                ProjectDetail.hideDetail();
+            }
+            if (projectsList) projectsList.style.display = '';
+        } else {
+            if (projectsContainer) projectsContainer.style.display = 'block';
+            if (detailContainer) detailContainer.style.display = 'none';
+            renderProjectsList();
+        }
+
+        if (section === 'dashboard') renderDashboard();
+        if (section === 'templates') renderTemplates();
     }
 
-    if (section === 'dashboard') renderDashboard();
-    if (section === 'templates') renderTemplates();
-}
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
     function init() {
         loadProjects();
         renderDashboard();
@@ -642,5 +665,5 @@ const TopbarModule = (function() {
         switchToSection('dashboard');
     }
 
-    return { init, renderDashboard, renderProjectsList, loadProjects };
+    return { init, renderDashboard, renderProjectsList, switchToSection };
 })();
