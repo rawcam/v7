@@ -14,6 +14,10 @@ const ProjectDetail = (function() {
         if (typeof TopbarModule !== 'undefined' && TopbarModule.renderDashboard) {
             TopbarModule.renderDashboard();
         }
+        // Обновляем список проектов, если он видим
+        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
+            TopbarModule.renderProjectsList();
+        }
     }
 
     function findProject(id) {
@@ -255,24 +259,24 @@ const ProjectDetail = (function() {
         currentProjectId = projectId;
         currentProject = findProject(projectId);
         if (!currentProject) return;
-        const container = document.getElementById('projectDetailContainer');
         const projectsContainer = document.getElementById('projectsContainer');
-        if (container && projectsContainer) {
+        const detailContainer = document.getElementById('projectDetailContainer');
+        if (projectsContainer && detailContainer) {
             projectsContainer.style.display = 'none';
-            container.style.display = 'block';
+            detailContainer.style.display = 'block';
             renderDetail();
         }
     }
 
     function hideDetail() {
-        const container = document.getElementById('projectDetailContainer');
         const projectsContainer = document.getElementById('projectsContainer');
-        if (container && projectsContainer) {
-            container.style.display = 'none';
+        const detailContainer = document.getElementById('projectDetailContainer');
+        if (projectsContainer && detailContainer) {
+            detailContainer.style.display = 'none';
             projectsContainer.style.display = 'block';
             currentProjectId = null;
             currentProject = null;
-            // обновляем список проектов
+            // обновляем список проектов (на случай, если были изменения)
             if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
                 TopbarModule.renderProjectsList();
             }
