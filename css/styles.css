@@ -1224,3 +1224,66 @@ input:focus, select:focus, textarea:focus {
         right: 5px;
     }
 }
+/* Виджет загрузки сотрудников */
+.workload-stats {
+    margin-bottom: 16px;
+}
+.stat-summary {
+    font-size: 0.8rem;
+    margin: 6px 0;
+    color: var(--text-secondary);
+}
+.stat-summary strong {
+    color: var(--accent);
+}
+.workload-details {
+    margin-top: 12px;
+}
+.workload-details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.workload-list {
+    margin-top: 8px;
+}
+.workload-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.workload-name {
+    width: 120px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+.workload-count {
+    width: 60px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.progress-bar-container.small {
+    flex: 1;
+    height: 6px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-bar-container.small .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+}
+@media (max-width: 768px) {
+    .workload-name {
+        width: auto;
+        flex: 1;
+    }
+    .workload-count {
+        width: auto;
+        text-align: right;
+    }
+}
