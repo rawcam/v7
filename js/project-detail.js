@@ -71,6 +71,18 @@ const ProjectDetail = (function() {
         return next[status] || null;
     }
 
+    // Автоматический прогресс на основе статуса
+    function getProgressByStatus(status) {
+        switch(status) {
+            case 'presale': return 10;
+            case 'design': return 30;
+            case 'ready': return 60;
+            case 'construction': return 80;
+            case 'done': return 100;
+            default: return 0;
+        }
+    }
+
     function renderDetail() {
         if (!currentProject) return;
         const container = document.getElementById('projectDetailContainer');
@@ -78,6 +90,9 @@ const ProjectDetail = (function() {
 
         const p = currentProject;
         const nextStatus = getNextStatusText(p.status);
+        const autoProgress = getProgressByStatus(p.status);
+        // Если прогресс ещё не сохранён, используем автоматический
+        const progress = p.progress !== undefined ? p.progress : autoProgress;
 
         container.innerHTML = `
             <div class="dashboard-wrapper" style="max-width: 800px; margin: 0 auto;">
@@ -121,8 +136,10 @@ const ProjectDetail = (function() {
                     </div>
 
                     <div class="detail-progress">
-                        <label>Прогресс: <span id="progressValue">${p.progress}%</span></label>
-                        <input type="range" id="projectProgress" min="0" max="100" step="5" value="${p.progress}" class="progress-slider">
+                        <label>Прогресс: <span id="progressValue">${progress}%</span></label>
+                        <div class="progress-bar-container">
+                            <div class="progress-fill" id="progressFill" style="width: ${progress}%; background: ${p.priority ? '#f97316' : 'var(--accent)'}"></div>
+                        </div>
                     </div>
 
                     <div class="detail-roadmap">
@@ -189,13 +206,25 @@ const ProjectDetail = (function() {
         document.getElementById('backToProjectsBtn')?.addEventListener('click', hideDetail);
         document.getElementById('saveProjectBtn')?.addEventListener('click', saveChanges);
         document.getElementById('deleteProjectBtn')?.addEventListener('click', () => deleteProject(currentProject.id));
-        document.getElementById('projectProgress')?.addEventListener('input', (e) => {
-            document.getElementById('progressValue').innerText = e.target.value + '%';
-        });
         document.getElementById('projectBudget')?.addEventListener('blur', (e) => {
             const val = parseCurrency(e.target.value);
             e.target.value = formatCurrency(val);
         });
+
+        // При изменении статуса обновляем прогресс
+        const statusSelect = document.getElementById('projectStatus');
+        if (statusSelect) {
+            statusSelect.addEventListener('change', (e) => {
+                const newStatus = e.target.value;
+                const newProgress = getProgressByStatus(newStatus);
+                const progressFill = document.getElementById('progressFill');
+                const progressValue = document.getElementById('progressValue');
+                if (progressFill && progressValue) {
+                    progressFill.style.width = newProgress + '%';
+                    progressValue.innerText = newProgress + '%';
+                }
+            });
+        }
 
         document.querySelectorAll('.add-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -236,7 +265,8 @@ const ProjectDetail = (function() {
         currentProject.startDate = document.getElementById('projectStartDate').value;
         currentProject.engineer = document.getElementById('projectEngineer').value;
         currentProject.projectManager = document.getElementById('projectManager').value;
-        currentProject.progress = parseInt(document.getElementById('projectProgress').value);
+        // Сохраняем автоматический прогресс на основе статуса
+        currentProject.progress = getProgressByStatus(currentProject.status);
         currentProject.nextStatusDate = document.getElementById('nextStatusDate')?.value || null;
 
         // Сохраняем встречи
@@ -290,7 +320,6 @@ const ProjectDetail = (function() {
             projectsContainer.style.display = 'block';
             currentProjectId = null;
             currentProject = null;
-            // Принудительно перерисовываем список проектов
             if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
                 TopbarModule.renderProjectsList();
             }
