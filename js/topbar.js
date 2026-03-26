@@ -298,7 +298,6 @@ const TopbarModule = (function() {
             </details>
         `;
 
-        // Обработчики кликов на имена
         document.querySelectorAll('.workload-name.clickable').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -334,7 +333,7 @@ const TopbarModule = (function() {
                                     <th>Статус</th>
                                     <th>Прогресс</th>
                                     <th>Начало</th>
-                                 </tr>
+                                </tr>
                             </thead>
                             <tbody>
                                 ${filteredProjects.map(p => `
@@ -603,7 +602,7 @@ const TopbarModule = (function() {
         }
     }
 
-    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ (с жёстким скрытием) ==========
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ (ЖЁСТКОЕ УПРАВЛЕНИЕ) ==========
     function switchToSection(section) {
         console.log('switchToSection:', section);
         currentSection = section;
@@ -624,21 +623,24 @@ const TopbarModule = (function() {
             if (mainContent) mainContent.classList.add('full-width');
         }
 
-        // Жёсткое скрытие проектов при уходе из раздела
+        // Жёсткое управление контейнерами проектов
         const projectsContainer = document.getElementById('projectsContainer');
         const detailContainer = document.getElementById('projectDetailContainer');
-        const projectsList = document.getElementById('projectsList');
 
         if (section !== 'projects') {
+            // Скрываем оба контейнера проектов
             if (projectsContainer) projectsContainer.style.display = 'none';
-            if (detailContainer) detailContainer.style.display = 'none';
+            if (detailContainer) {
+                detailContainer.style.display = 'none';
+                // Очищаем содержимое, чтобы удалить любые остатки
+                detailContainer.innerHTML = '';
+            }
+            // Если детальная страница была открыта, вызываем её метод hideDetail для сброса состояния
             if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
                 ProjectDetail.hideDetail();
             }
-            if (projectsList) projectsList.style.display = '';
-            if (projectsContainer) projectsContainer.classList.remove('active');
-            if (detailContainer) detailContainer.classList.remove('active');
         } else {
+            // Показываем список проектов
             if (projectsContainer) projectsContainer.style.display = 'block';
             if (detailContainer) detailContainer.style.display = 'none';
             renderProjectsList();
