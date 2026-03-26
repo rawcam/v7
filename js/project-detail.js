@@ -10,13 +10,10 @@ const ProjectDetail = (function() {
 
     function saveProjects(projects) {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
-        // Обновляем дашборд, если он активен
-        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderDashboard) {
-            TopbarModule.renderDashboard();
-        }
-        // Обновляем список проектов, если он видим
-        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
-            TopbarModule.renderProjectsList();
+        // Обновляем дашборд и список проектов
+        if (typeof TopbarModule !== 'undefined') {
+            if (TopbarModule.renderDashboard) TopbarModule.renderDashboard();
+            if (TopbarModule.renderProjectsList) TopbarModule.renderProjectsList();
         }
     }
 
@@ -71,6 +68,16 @@ const ProjectDetail = (function() {
             done: null
         };
         return next[status] || null;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
 
     function renderDetail() {
@@ -276,25 +283,11 @@ const ProjectDetail = (function() {
             projectsContainer.style.display = 'block';
             currentProjectId = null;
             currentProject = null;
-            // обновляем список проектов (на случай, если были изменения)
-            if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
-                TopbarModule.renderProjectsList();
-            }
         }
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
     function init() {
-        // Добавляем обработчики на карточки проектов (делегирование)
+        // Обработчик для кликов по карточкам проектов (делегирование)
         document.addEventListener('click', (e) => {
             const card = e.target.closest('.project-card');
             if (card && card.closest('#projectsList')) {
