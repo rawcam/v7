@@ -222,18 +222,17 @@ const TopbarModule = (function() {
         }
     });
 
-    // Определяем максимальную загрузку для прогресс-бара
     const maxEngineerLoad = Math.max(...Object.values(engineers), 1);
     const maxManagerLoad = Math.max(...Object.values(managers), 1);
 
-    // Формируем HTML
+    // Формируем HTML с атрибутами data-person и data-role
     let engineersHtml = '';
     for (const [name, count] of Object.entries(engineers).sort((a,b) => b[1] - a[1])) {
         const percent = (count / maxEngineerLoad) * 100;
         engineersHtml += `
             <div class="workload-item">
-                <div class="workload-name">${escapeHtml(name)}</div>
-                <div class="workload-count">${count} проект(ов)</div>
+                <span class="workload-name clickable" data-person="${escapeHtml(name)}" data-role="engineer">${escapeHtml(name)}</span>
+                <span class="workload-count">${count} проект(ов)</span>
                 <div class="progress-bar-container small">
                     <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
                 </div>
@@ -245,8 +244,8 @@ const TopbarModule = (function() {
         const percent = (count / maxManagerLoad) * 100;
         managersHtml += `
             <div class="workload-item">
-                <div class="workload-name">${escapeHtml(name)}</div>
-                <div class="workload-count">${count} проект(ов)</div>
+                <span class="workload-name clickable" data-person="${escapeHtml(name)}" data-role="manager">${escapeHtml(name)}</span>
+                <span class="workload-count">${count} проект(ов)</span>
                 <div class="progress-bar-container small">
                     <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
                 </div>
@@ -279,28 +278,17 @@ const TopbarModule = (function() {
             <div class="workload-list">${managersHtml || '<div>Нет активных проектов</div>'}</div>
         </details>
     `;
-}  
-        allMeetings.sort((a, b) => new Date(a.date) - new Date(b.date));
-        const upcoming = allMeetings.slice(0, 3);
-        const totalMeetings = allMeetings.length;
-        const container = document.getElementById('meetingsWidget');
-        if (!container) return;
-        container.innerHTML = `
-            <div class="project-header">
-                <div class="project-name">Встречи</div>
-                <div class="project-status">${totalMeetings}</div>
-            </div>
-            ${upcoming.map(m => `
-                <div class="meeting-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border-light);">
-                    <span class="meeting-date">${m.date}</span>
-                    <span class="meeting-subject">${escapeHtml(m.subject)}</span>
-                    <span class="meeting-project">${escapeHtml(m.projectName)}</span>
-                </div>
-            `).join('')}
-            ${upcoming.length === 0 ? '<div class="empty-state">Нет предстоящих встреч</div>' : ''}
-        `;
-    }
 
+    // Добавляем обработчики кликов на имена
+    document.querySelectorAll('.workload-name.clickable').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const person = el.dataset.person;
+            const role = el.dataset.role;
+            showProjectsModal(person, role);
+        });
+    });
+}
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
