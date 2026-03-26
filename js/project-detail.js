@@ -10,11 +10,9 @@ const ProjectDetail = (function() {
 
     function saveProjects(projects) {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
-        // Обновляем дашборд
         if (typeof TopbarModule !== 'undefined' && TopbarModule.renderDashboard) {
             TopbarModule.renderDashboard();
         }
-        // Обновляем список проектов
         if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
             TopbarModule.renderProjectsList();
         }
@@ -82,7 +80,7 @@ const ProjectDetail = (function() {
         const nextStatus = getNextStatusText(p.status);
 
         container.innerHTML = `
-            <div style="max-width: 800px; margin: 0 auto;">
+            <div class="dashboard-wrapper" style="max-width: 800px; margin: 0 auto;">
                 <button class="btn-secondary" id="backToProjectsBtn" style="margin-bottom: 20px;">
                     <i class="fas fa-arrow-left"></i> Назад к проектам
                 </button>
@@ -142,7 +140,7 @@ const ProjectDetail = (function() {
                         <h4>Встречи</h4>
                         <div id="meetingsList" class="detail-list">
                             ${(p.meetings || []).map((m, idx) => `
-                                <div class="list-item">
+                                <div class="list-item" data-idx="${idx}">
                                     <input type="date" value="${m.date}" class="meeting-date" data-idx="${idx}">
                                     <input type="text" value="${escapeHtml(m.subject)}" class="meeting-subject" data-idx="${idx}">
                                     <button class="remove-item" data-type="meeting" data-idx="${idx}"><i class="fas fa-trash-alt"></i></button>
@@ -156,7 +154,7 @@ const ProjectDetail = (function() {
                         <h4>Закупки</h4>
                         <div id="purchasesList" class="detail-list">
                             ${(p.purchases || []).map((pr, idx) => `
-                                <div class="list-item">
+                                <div class="list-item" data-idx="${idx}">
                                     <input type="text" value="${escapeHtml(pr.name)}" class="purchase-name" data-idx="${idx}">
                                     <select class="purchase-status" data-idx="${idx}">
                                         <option value="ordered" ${pr.status === 'ordered' ? 'selected' : ''}>Заказано</option>
@@ -223,6 +221,8 @@ const ProjectDetail = (function() {
 
     function saveChanges() {
         if (!currentProject) return;
+
+        // Получаем значения полей
         currentProject.name = document.getElementById('projectName').value;
         currentProject.status = document.getElementById('projectStatus').value;
         currentProject.priority = document.getElementById('projectPriority').checked;
@@ -235,18 +235,26 @@ const ProjectDetail = (function() {
 
         // Сохраняем встречи
         const meetings = [];
-        document.querySelectorAll('.meeting-date').forEach((input, idx) => {
-            const subject = document.querySelector(`.meeting-subject[data-idx="${idx}"]`).value;
-            meetings.push({ date: input.value, subject });
+        const meetingItems = document.querySelectorAll('#meetingsList .list-item');
+        meetingItems.forEach((item, idx) => {
+            const dateInput = item.querySelector('.meeting-date');
+            const subjectInput = item.querySelector('.meeting-subject');
+            if (dateInput && subjectInput) {
+                meetings.push({ date: dateInput.value, subject: subjectInput.value });
+            }
         });
         currentProject.meetings = meetings;
 
         // Сохраняем закупки
         const purchases = [];
-        document.querySelectorAll('.purchase-name').forEach((input, idx) => {
-            const status = document.querySelector(`.purchase-status[data-idx="${idx}"]`).value;
-            const date = document.querySelector(`.purchase-date[data-idx="${idx}"]`).value;
-            purchases.push({ name: input.value, status, date });
+        const purchaseItems = document.querySelectorAll('#purchasesList .list-item');
+        purchaseItems.forEach((item, idx) => {
+            const nameInput = item.querySelector('.purchase-name');
+            const statusSelect = item.querySelector('.purchase-status');
+            const dateInput = item.querySelector('.purchase-date');
+            if (nameInput && statusSelect && dateInput) {
+                purchases.push({ name: nameInput.value, status: statusSelect.value, date: dateInput.value });
+            }
         });
         currentProject.purchases = purchases;
 
@@ -259,25 +267,23 @@ const ProjectDetail = (function() {
         currentProjectId = projectId;
         currentProject = findProject(projectId);
         if (!currentProject) return;
-
-        const projectsList = document.getElementById('projectsList');
+        const projectsContainer = document.getElementById('projectsContainer');
         const detailContainer = document.getElementById('projectDetailContainer');
-        if (projectsList && detailContainer) {
-            projectsList.style.display = 'none';
+        if (projectsContainer && detailContainer) {
+            projectsContainer.style.display = 'none';
             detailContainer.style.display = 'block';
             renderDetail();
         }
     }
 
     function hideDetail() {
-        const projectsList = document.getElementById('projectsList');
+        const projectsContainer = document.getElementById('projectsContainer');
         const detailContainer = document.getElementById('projectDetailContainer');
-        if (projectsList && detailContainer) {
+        if (projectsContainer && detailContainer) {
             detailContainer.style.display = 'none';
-            projectsList.style.display = 'block';
+            projectsContainer.style.display = 'block';
             currentProjectId = null;
             currentProject = null;
-            // обновляем список проектов (на случай, если были изменения)
             if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
                 TopbarModule.renderProjectsList();
             }
@@ -295,7 +301,6 @@ const ProjectDetail = (function() {
     }
 
     function init() {
-        // Добавляем обработчики на карточки проектов (делегирование)
         document.addEventListener('click', (e) => {
             const card = e.target.closest('.project-card');
             if (card && card.closest('#projectsList')) {
