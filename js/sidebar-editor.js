@@ -20,7 +20,9 @@ const SidebarEditor = (function() {
 
     // Сохранение порядка в localStorage
     function saveOrder() {
-        const sections = document.querySelectorAll('.sidebar-section');
+        const container = document.getElementById('sidebarSectionsContainer');
+        if (!container) return;
+        const sections = container.querySelectorAll('.sidebar-section');
         const order = Array.from(sections).map(section => section.id);
         localStorage.setItem('sidebar_order', JSON.stringify(order));
     }
@@ -30,9 +32,9 @@ const SidebarEditor = (function() {
         const savedOrder = localStorage.getItem('sidebar_order');
         if (!savedOrder) return false;
         try {
+            const order = JSON.parse(savedOrder);
             const container = document.getElementById('sidebarSectionsContainer');
-sections.forEach(section => container.appendChild(section));
-// Остальные секции тоже добавляем в этот контейнер
+            if (!container) return false;
             const sections = order.map(id => document.getElementById(id)).filter(el => el);
             if (sections.length === 0) return false;
             sections.forEach(section => container.appendChild(section));
@@ -45,7 +47,8 @@ sections.forEach(section => container.appendChild(section));
     // Сброс порядка по умолчанию
     function resetOrder() {
         localStorage.removeItem('sidebar_order');
-        const container = document.querySelector('.sidebar');
+        const container = document.getElementById('sidebarSectionsContainer');
+        if (!container) return;
         const sections = defaultOrder.map(id => document.getElementById(id)).filter(el => el);
         sections.forEach(section => container.appendChild(section));
         // Если какие-то секции не входят в defaultOrder, добавляем их в конец
@@ -56,7 +59,7 @@ sections.forEach(section => container.appendChild(section));
                 container.appendChild(section);
             }
         });
-        saveOrder(); // сохраняем новый порядок
+        saveOrder();
         if (isEditMode) disableEditMode();
     }
 
@@ -64,6 +67,7 @@ sections.forEach(section => container.appendChild(section));
     function enableEditMode() {
         if (sortable) sortable.destroy();
         const container = document.getElementById('sidebarSectionsContainer');
+        if (!container) return;
         sortable = new Sortable(container, {
             handle: '.section-header',
             animation: 150,
