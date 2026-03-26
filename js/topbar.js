@@ -359,6 +359,27 @@ const TopbarModule = (function() {
         if (mainContent) mainContent.classList.add('full-width');
     }
 
+    // Скрываем детальную страницу проекта при любом переключении, кроме раздела проектов
+    const detailContainer = document.getElementById('projectDetailContainer');
+    if (detailContainer) {
+        if (section === 'projects') {
+            // Если мы в разделе проектов, скрываем детальную страницу и показываем список
+            detailContainer.style.display = 'none';
+            const projectsContainer = document.getElementById('projectsContainer');
+            if (projectsContainer) projectsContainer.style.display = 'block';
+        } else {
+            // В других разделах детальная страница всегда скрыта
+            detailContainer.style.display = 'none';
+        }
+    }
+
+    if (section === 'dashboard') renderDashboard();
+    if (section === 'projects') {
+        renderProjectsList();
+    }
+    if (section === 'templates') renderTemplates();
+}
+
     // Скрываем детальную страницу, если переключаемся не в раздел проектов
     const detailContainer = document.getElementById('projectDetailContainer');
     if (section !== 'projects' && detailContainer) {
