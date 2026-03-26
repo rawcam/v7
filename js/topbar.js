@@ -1,4 +1,4 @@
-// topbar.js – обновлённая версия с каруселью и новыми виджетами
+// topbar.js
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -137,6 +137,35 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== НОВЫЕ ВИДЖЕТЫ ==========
+    function renderBudgetWidget() {
+        const activeProjects = projects.filter(p => p.status !== 'done');
+        const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+        const container = document.getElementById('budgetWidget');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Общий бюджет активных проектов</div>
+            </div>
+            <div class="stat-number" style="font-size: 1.8rem;">${formatCurrency(totalBudget)}</div>
+        `;
+    }
+
+    function renderProgressWidget() {
+        const activeProjects = projects.filter(p => p.status !== 'done');
+        const avgProgress = activeProjects.length
+            ? Math.round(activeProjects.reduce((sum, p) => sum + p.progress, 0) / activeProjects.length)
+            : 0;
+        const container = document.getElementById('progressWidget');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Средний прогресс</div>
+            </div>
+            <div class="stat-number" style="font-size: 1.8rem;">${avgProgress}%</div>
+        `;
+    }
+
     // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ ==========
     function renderUrgentWidget() {
         const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
@@ -200,45 +229,7 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТ ОБЩЕГО БЮДЖЕТА ==========
-    function renderBudgetWidget() {
-        const activeProjects = projects.filter(p => p.status !== 'done');
-        const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
-        const container = document.getElementById('budgetWidget');
-        if (!container) return;
-        container.innerHTML = `
-            <div class="project-header">
-                <div class="project-name">Общий бюджет</div>
-                <div class="project-status">${activeProjects.length} проекта</div>
-            </div>
-            <div class="budget-amount" style="font-size: 1.8rem; font-weight: 700; margin: 16px 0; text-align: center; background: linear-gradient(135deg, var(--text-primary), var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent;">
-                ${formatCurrency(totalBudget)}
-            </div>
-            <div class="budget-note" style="font-size: 0.7rem; text-align: center; color: var(--text-secondary);">по активным проектам</div>
-        `;
-    }
-
-    // ========== ВИДЖЕТ СРЕДНЕГО ПРОГРЕССА ==========
-    function renderProgressWidget() {
-        const activeProjects = projects.filter(p => p.status !== 'done');
-        const avgProgress = activeProjects.length ? Math.round(activeProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / activeProjects.length) : 0;
-        const container = document.getElementById('progressWidget');
-        if (!container) return;
-        container.innerHTML = `
-            <div class="project-header">
-                <div class="project-name">Средний прогресс</div>
-                <div class="project-status">по всем проектам</div>
-            </div>
-            <div class="progress-amount" style="font-size: 2rem; font-weight: 700; margin: 16px 0; text-align: center; background: linear-gradient(135deg, var(--text-primary), var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent;">
-                ${avgProgress}%
-            </div>
-            <div class="progress-bar" style="height: 6px; background: var(--card-bg); border-radius: 3px; margin-top: 8px;">
-                <div style="width: ${avgProgress}%; height: 100%; background: var(--accent); border-radius: 3px;"></div>
-            </div>
-        `;
-    }
-
-    // ========== КАРТОЧКИ АКТИВНЫХ ПРОЕКТОВ (для карусели) ==========
+    // ========== КАРТОЧКИ АКТИВНЫХ ПРОЕКТОВ ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
@@ -288,11 +279,11 @@ const TopbarModule = (function() {
     }
 
     function initProjectsSwiper() {
+        if (projectsSwiper) projectsSwiper.destroy(true, true);
         const container = document.getElementById('projectsSwiperContainer');
         if (!container) return;
-        if (projectsSwiper) projectsSwiper.destroy(true, true);
-        // Проверяем, есть ли слайды
-        if (document.querySelectorAll('.swiper-slide').length === 0) return;
+        // Если карточек нет, не инициализируем
+        if (document.querySelectorAll('#projectCardsContainer .swiper-slide').length === 0) return;
         projectsSwiper = new Swiper(container, {
             slidesPerView: 1,
             spaceBetween: 24,
@@ -313,11 +304,12 @@ const TopbarModule = (function() {
     }
 
     function renderDashboard() {
+        console.log('renderDashboard called');
         renderStatsCard();
-        renderUrgentWidget();
-        renderMeetingsWidget();
         renderBudgetWidget();
         renderProgressWidget();
+        renderUrgentWidget();
+        renderMeetingsWidget();
         renderProjectCards();
     }
 
@@ -374,7 +366,6 @@ const TopbarModule = (function() {
         if (section === 'templates') renderTemplates();
     }
 
-    // ========== ПРОЕКТЫ (список) ==========
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -412,7 +403,6 @@ const TopbarModule = (function() {
         });
     }
 
-    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
