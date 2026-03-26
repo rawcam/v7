@@ -896,3 +896,18 @@ input:focus, select:focus, textarea:focus {
 .modal {
     display: none;
 }
+/* Стили для заголовков в разделах Проекты и Шаблоны */
+#projectsContainer h2,
+#templatesContainer h2 {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, var(--text-primary), var(--accent));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    display: inline-block;
+    width: 100%;
+}
