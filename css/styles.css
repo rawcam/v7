@@ -923,3 +923,11 @@ input:focus, select:focus, textarea:focus {
     transform: translateY(-4px);
     box-shadow: var(--shadow-hover);
 }
+.mobile-menu-toggle {
+    display: none; /* по умолчанию скрыта */
+}
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex; /* показываем только на мобильных */
+    }
+}
