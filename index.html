@@ -8,75 +8,75 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="css/styles.css">
     <style>
-    /* Дополнительные стили для топбара и дашборда */
-    .sidebar.hidden { display: none; }
-    .main-content.full-width { max-width: 100%; margin-left: 0; }
-    .section-container { display: none; }
-    .section-container.active { display: block; }
-    .dashboard-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+        /* Дополнительные стили для топбара и дашборда */
+        .sidebar.hidden { display: none; }
+        .main-content.full-width { max-width: 100%; margin-left: 0; }
+        .section-container { display: none; }
+        .section-container.active { display: block; }
+        .dashboard-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
 
-    /* Сетка виджетов: 5 колонок на широких экранах */
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 24px;
-        margin: 32px 0;
-    }
-    .dashboard-grid .project-card {
-        margin-bottom: 0;
-    }
-    @media (max-width: 1200px) {
+        /* Сетка виджетов: 5 колонок на широких экранах */
         .dashboard-grid {
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 24px;
+            margin: 32px 0;
         }
-    }
+        .dashboard-grid .project-card {
+            margin-bottom: 0;
+        }
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
 
-    .widget-section h3, .dashboard-wrapper h2 {
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .dashboard-wrapper h2 {
-        font-size: 1.5rem;
-        margin-bottom: 24px;
-    }
+        .widget-section h3, .dashboard-wrapper h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dashboard-wrapper h2 {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+        }
 
-    /* Обёртка для карусели, чтобы кнопки были за пределами 1400px */
-    .projects-swiper-wrapper {
-        position: relative;
-        margin: 0 -20px;
-        padding: 0 20px;
-    }
-    .projects-swiper-wrapper .swiper-container {
-        overflow: visible;
-    }
-    .projects-swiper-wrapper .swiper-button-prev,
-    .projects-swiper-wrapper .swiper-button-next {
-        width: 40px;
-        height: 40px;
-        background: var(--bg-panel);
-        border-radius: 50%;
-        box-shadow: var(--shadow);
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    .projects-swiper-wrapper .swiper-button-prev {
-        left: -20px;
-    }
-    .projects-swiper-wrapper .swiper-button-next {
-        right: -20px;
-    }
-    @media (max-width: 768px) {
+        /* Обёртка для карусели, чтобы кнопки были за пределами 1400px */
         .projects-swiper-wrapper {
-            margin: 0;
-            padding: 0;
+            position: relative;
+            margin: 0 -20px;
+            padding: 0 20px;
+        }
+        .projects-swiper-wrapper .swiper-container {
+            overflow: visible;
         }
         .projects-swiper-wrapper .swiper-button-prev,
         .projects-swiper-wrapper .swiper-button-next {
-            display: none;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-panel);
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            top: 50%;
+            transform: translateY(-50%);
         }
-    }
-</style>
+        .projects-swiper-wrapper .swiper-button-prev {
+            left: -20px;
+        }
+        .projects-swiper-wrapper .swiper-button-next {
+            right: -20px;
+        }
+        @media (max-width: 768px) {
+            .projects-swiper-wrapper {
+                margin: 0;
+                padding: 0;
+            }
+            .projects-swiper-wrapper .swiper-button-prev,
+            .projects-swiper-wrapper .swiper-button-next {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="topbar">
