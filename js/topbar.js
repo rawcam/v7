@@ -1,4 +1,4 @@
-// topbar.js – исправленная версия
+// topbar.js
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -110,7 +110,6 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
-    // ========== ОБЩАЯ СТАТИСТИКА ==========
     function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
@@ -137,7 +136,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== НОВЫЕ ВИДЖЕТЫ ==========
     function renderBudgetWidget() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
@@ -166,7 +164,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ ==========
     function renderUrgentWidget() {
         const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
         const container = document.getElementById('urgentProjectsWidget');
@@ -194,7 +191,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТ ВСТРЕЧ ==========
     function renderMeetingsWidget() {
         const allMeetings = [];
         projects.forEach(project => {
@@ -229,7 +225,6 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== КАРТОЧКИ АКТИВНЫХ ПРОЕКТОВ ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
@@ -339,10 +334,12 @@ const TopbarModule = (function() {
         projects.push(newProject);
         saveProjects();
         renderDashboard();
-        renderProjectsList(); // обновляем список проектов
+        // Открываем детальную страницу нового проекта
+        if (typeof ProjectDetail !== 'undefined') {
+            ProjectDetail.showDetail(newProject.id);
+        }
     }
 
-    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
         console.log('switchToSection:', section);
         currentSection = section;
@@ -361,6 +358,13 @@ const TopbarModule = (function() {
             if (sidebar) sidebar.classList.add('hidden');
             if (mainContent) mainContent.classList.add('full-width');
         }
+
+        // Скрываем детальную страницу проекта, если переключаемся не в раздел проектов
+        const detailContainer = document.getElementById('projectDetailContainer');
+        if (section !== 'projects' && detailContainer) {
+            detailContainer.style.display = 'none';
+        }
+
         if (section === 'dashboard') renderDashboard();
         if (section === 'projects') renderProjectsList();
         if (section === 'templates') renderTemplates();
@@ -390,7 +394,9 @@ const TopbarModule = (function() {
         document.querySelectorAll('.edit-project').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
-                if (id && typeof ProjectDetail !== 'undefined') ProjectDetail.showDetail(id);
+                if (id && typeof ProjectDetail !== 'undefined') {
+                    ProjectDetail.showDetail(id);
+                }
             });
         });
         document.querySelectorAll('.delete-project').forEach(btn => {
@@ -487,5 +493,5 @@ const TopbarModule = (function() {
         switchToSection('dashboard');
     }
 
-    return { init, renderProjectsList, renderDashboard };
+    return { init, renderDashboard, renderProjectsList };
 })();
