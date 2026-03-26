@@ -9,81 +9,23 @@
     <link rel="stylesheet" href="css/styles.css">
     <style>
         /* Дополнительные стили для топбара и дашборда */
-        .sidebar.hidden {
-            display: none;
-        }
-        .main-content.full-width {
-            max-width: 100%;
-            margin-left: 0;
-        }
-        .section-container {
-            display: none;
-        }
-        .section-container.active {
-            display: block;
-        }
-        /* Центрирование контента */
-        .dashboard-wrapper {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-        /* Сетка для всех карточек на главной */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            margin: 32px 0;
-        }
-        .dashboard-grid .project-card {
-            margin-bottom: 0;
-        }
-        /* Центровка заголовков */
-        .widget-section h3, .dashboard-wrapper h2 {
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .dashboard-wrapper h2 {
-            font-size: 1.5rem;
-            margin-bottom: 24px;
-        }
-        /* Карусель */
-        .swiper-container {
-            width: 100%;
-            padding: 8px 40px 40px 40px;
-            position: relative;
-        }
-        .swiper-button-prev,
-        .swiper-button-next {
-            color: var(--accent);
-            background: var(--bg-panel);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            backdrop-filter: blur(4px);
-            box-shadow: var(--shadow);
-        }
-        .swiper-button-prev:after,
-        .swiper-button-next:after {
-            font-size: 18px;
-        }
-        .swiper-pagination-bullet {
-            background: var(--text-secondary);
-            opacity: 0.5;
-        }
-        .swiper-pagination-bullet-active {
-            background: var(--accent);
-            opacity: 1;
-        }
+        .sidebar.hidden { display: none; }
+        .main-content.full-width { max-width: 100%; margin-left: 0; }
+        .section-container { display: none; }
+        .section-container.active { display: block; }
+        .dashboard-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; margin: 32px 0; }
+        .dashboard-grid .project-card { margin-bottom: 0; }
+        .widget-section h3, .dashboard-wrapper h2 { text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .dashboard-wrapper h2 { font-size: 1.5rem; margin-bottom: 24px; }
+        .swiper-container { width: 100%; padding: 8px 40px 40px 40px; position: relative; }
+        .swiper-button-prev, .swiper-button-next { color: var(--accent); background: var(--bg-panel); width: 40px; height: 40px; border-radius: 50%; backdrop-filter: blur(4px); box-shadow: var(--shadow); }
+        .swiper-button-prev:after, .swiper-button-next:after { font-size: 18px; }
+        .swiper-pagination-bullet { background: var(--text-secondary); opacity: 0.5; }
+        .swiper-pagination-bullet-active { background: var(--accent); opacity: 1; }
         @media (max-width: 768px) {
-            .swiper-container {
-                padding: 8px 20px 40px 20px;
-            }
-            .swiper-button-prev,
-            .swiper-button-next {
-                display: none;
-            }
+            .swiper-container { padding: 8px 20px 40px 20px; }
+            .swiper-button-prev, .swiper-button-next { display: none; }
         }
     </style>
 </head>
@@ -103,7 +45,7 @@
     </div>
 </div>
 <div class="app-layout">
-    <!-- Сайдбар (изначально скрыт, показывается только в разделе "Расчёты") -->
+    <!-- Сайдбар -->
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
             <h2>SPUTNIK STUDIO</h2>
@@ -130,7 +72,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- NETWORK аккордеон -->
             <div class="sidebar-section" id="networkSection">
                 <div class="section-header" data-section="network">
@@ -149,7 +90,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- LED аккордеон -->
             <div class="sidebar-section" id="ledSection">
                 <div class="section-header" data-section="led">
@@ -164,7 +104,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- SOUND аккордеон -->
             <div class="sidebar-section" id="soundSection">
                 <div class="section-header" data-section="sound">
@@ -182,7 +121,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- VC аккордеон -->
             <div class="sidebar-section" id="vcSection">
                 <div class="section-header" data-section="vc">
@@ -197,7 +135,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Эргономика ЭКП -->
             <div class="sidebar-section" id="ergoSection">
                 <div class="section-header" data-section="ergo">
@@ -209,7 +146,6 @@
                     <button class="btn-primary" id="showErgoCalcBtn"><i class="fas fa-calculator"></i> Показать калькулятор</button>
                 </div>
             </div>
-
             <!-- TRACTS аккордеон -->
             <div class="sidebar-section" id="pathsSection">
                 <div class="section-header" data-section="paths">
@@ -225,7 +161,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- СТАТИСТИКА: сеть -->
             <div class="sidebar-section" id="networkStatsSection">
                 <div class="section-header" data-section="networkStats">
@@ -256,7 +191,6 @@
                     <div class="widget-item"><span class="widget-label"><i class="fas fa-thermometer-half"></i><span> Тепло:</span></span><span class="widget-value" id="sidebarTotalBTU">0</span> BTU/ч</div></div>
                 </div>
             </div>
-
             <!-- ЭНЕРГИЯ (ИБП и кондиционер) -->
             <div class="sidebar-section" id="powerSection">
                 <div class="section-header" data-section="power">
@@ -268,7 +202,6 @@
                     <button class="btn-primary" id="showPowerCalcBtn"><i class="fas fa-calculator"></i> Калькулятор питания</button>
                 </div>
             </div>
-
             <!-- УПРАВЛЕНИЕ -->
             <div class="sidebar-section" id="manageSection">
                 <div class="section-header" data-section="manage">
@@ -300,19 +233,13 @@
         <div id="dashboardContainer" class="section-container active">
             <div class="dashboard-wrapper">
                 <h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>
-
-                <!-- Общая статистика -->
                 <div class="stats-card" id="statsCard"></div>
-
-                <!-- Сетка для всех виджетов-карточек -->
                 <div class="dashboard-grid">
                     <div class="project-card" id="budgetWidget"></div>
                     <div class="project-card" id="progressWidget"></div>
                     <div class="project-card" id="urgentProjectsWidget"></div>
                     <div class="project-card" id="meetingsWidget"></div>
                 </div>
-
-                <!-- Активные проекты (карусель) -->
                 <div class="widget-section">
                     <h3>Активные проекты</h3>
                     <div class="swiper-container" id="projectsSwiperContainer">
@@ -325,7 +252,7 @@
             </div>
         </div>
 
-        <!-- Контейнер для расчётов (в нём будет отображаться текущий калькулятор/тракты) -->
+        <!-- Контейнер для расчётов -->
         <div id="calculationsContainer" class="section-container">
             <div id="activePathContainer" class="active-path-container"></div>
             <div id="allTractsContainer" style="display: none;"></div>
@@ -392,7 +319,7 @@
 </div>
 <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
 
-<!-- Модальные окна (не отображаются, пока не вызваны) -->
+<!-- Модальные окна -->
 <div id="addDeviceModal" class="modal">
     <div class="modal-content">
         <h3>Добавить устройство</h3>
