@@ -1,4 +1,4 @@
-// topbar.js – дашборд с виджетами
+// topbar.js – дашборд с единой карточкой статистики
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -109,8 +109,8 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
-    // ========== ОБЩАЯ СТАТИСТИКА ==========
-    function renderStats() {
+    // ========== ОБЩАЯ СТАТИСТИКА (ОДНА КАРТОЧКА) ==========
+    function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
         const presale = projects.filter(p => p.status === 'presale').length;
@@ -120,17 +120,23 @@ const TopbarModule = (function() {
         const urgent = projects.filter(p => p.priority === true).length;
         const archived = projects.filter(p => p.status === 'done').length;
 
-        document.getElementById('statsTotal').innerText = total;
-        document.getElementById('statsActive').innerText = active;
-        document.getElementById('statsPresale').innerText = presale;
-        document.getElementById('statsDesign').innerText = design;
-        document.getElementById('statsReady').innerText = ready;
-        document.getElementById('statsConstruction').innerText = construction;
-        document.getElementById('statsUrgent').innerText = urgent;
-        document.getElementById('statsArchived').innerText = archived;
+        const container = document.getElementById('statsCard');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="stats-grid">
+                <div class="stat-item"><span class="stat-label">Всего проектов</span><span class="stat-number">${total}</span></div>
+                <div class="stat-item"><span class="stat-label">Активные</span><span class="stat-number">${active}</span></div>
+                <div class="stat-item"><span class="stat-label">Ожидают оплату</span><span class="stat-number">${presale}</span></div>
+                <div class="stat-item"><span class="stat-label">Стадия П</span><span class="stat-number">${design}</span></div>
+                <div class="stat-item"><span class="stat-label">Стадия Р</span><span class="stat-number">${ready}</span></div>
+                <div class="stat-item"><span class="stat-label">Монтаж</span><span class="stat-number">${construction}</span></div>
+                <div class="stat-item urgent-stat"><span class="stat-label">Срочные</span><span class="stat-number">${urgent}</span></div>
+                <div class="stat-item"><span class="stat-label">В архиве</span><span class="stat-number">${archived}</span></div>
+            </div>
+        `;
     }
 
-    // ========== ВИДЖЕТ ВСТРЕЧ ==========
+    // ========== ВИДЖЕТ ВСТРЕЧ (КАРТОЧКА) ==========
     function renderMeetingsWidget() {
         const allMeetings = [];
         projects.forEach(project => {
@@ -151,8 +157,10 @@ const TopbarModule = (function() {
         const container = document.getElementById('meetingsWidget');
         if (!container) return;
         container.innerHTML = `
-            <div class="stat-number">${totalMeetings}</div>
-            <div class="stat-label">всего встреч</div>
+            <div class="widget-header">
+                <span class="stat-number">${totalMeetings}</span>
+                <span class="stat-label">всего встреч</span>
+            </div>
             <div class="upcoming-meetings">
                 ${upcoming.map(m => `
                     <div class="meeting-item">
@@ -166,18 +174,20 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ ==========
+    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ (КАРТОЧКА) ==========
     function renderUrgentWidget() {
         const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
         const container = document.getElementById('urgentProjectsWidget');
         if (!container) return;
         if (urgentProjects.length === 0) {
-            container.innerHTML = '<div class="stat-number">0</div><div class="stat-label">срочных проектов</div><div class="no-urgent">Нет срочных проектов</div>';
+            container.innerHTML = '<div class="widget-header"><span class="stat-number">0</span><span class="stat-label">срочных проектов</span></div><div class="no-urgent">Нет срочных проектов</div>';
             return;
         }
         container.innerHTML = `
-            <div class="stat-number">${urgentProjects.length}</div>
-            <div class="stat-label">срочных проектов</div>
+            <div class="widget-header">
+                <span class="stat-number">${urgentProjects.length}</span>
+                <span class="stat-label">срочных проектов</span>
+            </div>
             <div class="urgent-list">
                 ${urgentProjects.map(p => `
                     <div class="urgent-item">
@@ -189,7 +199,7 @@ const TopbarModule = (function() {
         `;
     }
 
-    // ========== ВИДЖЕТЫ ПРОЕКТОВ (карточки) ==========
+    // ========== КАРТОЧКИ АКТИВНЫХ ПРОЕКТОВ ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
@@ -236,7 +246,7 @@ const TopbarModule = (function() {
     }
 
     function renderDashboard() {
-        renderStats();
+        renderStatsCard();
         renderProjectCards();
         renderUrgentWidget();
         renderMeetingsWidget();
@@ -295,7 +305,6 @@ const TopbarModule = (function() {
         if (section === 'templates') renderTemplates();
     }
 
-    // ========== ПРОЕКТЫ (список) – упрощённо ==========
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
         if (!container) return;
