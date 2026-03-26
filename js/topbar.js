@@ -367,7 +367,7 @@ const TopbarModule = (function() {
 
     if (section === 'dashboard') renderDashboard();
     if (section === 'projects') {
-        // Принудительно показываем список и перерисовываем его
+        // При переключении в раздел проектов убеждаемся, что список видим, детальная скрыта
         const projectsContainer = document.getElementById('projectsContainer');
         if (projectsContainer) projectsContainer.style.display = 'block';
         renderProjectsList();
