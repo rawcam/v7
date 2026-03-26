@@ -6,12 +6,15 @@ const NetworkModule = (function() {
         const state = AppState.getState();
         const settings = state.globalSettings;
 
-        const cable = document.getElementById('globalCable').value;
-        const multicast = document.getElementById('globalMulticast').checked;
-        const qos = document.getElementById('globalQoS').checked;
-        const networkType = document.getElementById('networkType').value;
-        const syncProtocol = document.getElementById('syncProtocol').value;
-        const redundancy = document.getElementById('redundancy').checked;
+        const cable = document.getElementById('globalCable')?.value;
+        const multicast = document.getElementById('globalMulticast')?.checked;
+        const qos = document.getElementById('globalQoS')?.checked;
+        const networkType = document.getElementById('networkType')?.value;
+        const syncProtocol = document.getElementById('syncProtocol')?.value;
+        const redundancy = document.getElementById('redundancy')?.checked;
+
+        // Если какой-то элемент отсутствует, не обновляем состояние
+        if (cable === undefined || networkType === undefined || syncProtocol === undefined) return;
 
         if (settings.cable !== cable ||
             settings.multicast !== multicast ||
@@ -29,15 +32,23 @@ const NetworkModule = (function() {
     }
 
     function syncFromState(settings) {
-        document.getElementById('globalCable').value = settings.cable;
-        document.getElementById('globalMulticast').checked = settings.multicast;
-        document.getElementById('globalQoS').checked = settings.qos;
-        document.getElementById('networkType').value = settings.networkType;
-        document.getElementById('syncProtocol').value = settings.syncProtocol;
-        document.getElementById('redundancy').checked = settings.redundancy;
+        const cableEl = document.getElementById('globalCable');
+        const multicastEl = document.getElementById('globalMulticast');
+        const qosEl = document.getElementById('globalQoS');
+        const networkTypeEl = document.getElementById('networkType');
+        const syncProtocolEl = document.getElementById('syncProtocol');
+        const redundancyEl = document.getElementById('redundancy');
+        const multicastStatus = document.getElementById('sidebarMulticastStatus');
+        const qosStatus = document.getElementById('sidebarQoSStatus');
 
-        document.getElementById('sidebarMulticastStatus').innerText = settings.multicast ? 'Вкл' : 'Выкл';
-        document.getElementById('sidebarQoSStatus').innerText = settings.qos ? 'Вкл' : 'Выкл';
+        if (cableEl) cableEl.value = settings.cable;
+        if (multicastEl) multicastEl.checked = settings.multicast;
+        if (qosEl) qosEl.checked = settings.qos;
+        if (networkTypeEl) networkTypeEl.value = settings.networkType;
+        if (syncProtocolEl) syncProtocolEl.value = settings.syncProtocol;
+        if (redundancyEl) redundancyEl.checked = settings.redundancy;
+        if (multicastStatus) multicastStatus.innerText = settings.multicast ? 'Вкл' : 'Выкл';
+        if (qosStatus) qosStatus.innerText = settings.qos ? 'Вкл' : 'Выкл';
     }
 
     function init() {
