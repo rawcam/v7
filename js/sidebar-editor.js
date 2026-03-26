@@ -30,8 +30,9 @@ const SidebarEditor = (function() {
         const savedOrder = localStorage.getItem('sidebar_order');
         if (!savedOrder) return false;
         try {
-            const order = JSON.parse(savedOrder);
-            const container = document.querySelector('.sidebar');
+            const container = document.getElementById('sidebarSectionsContainer');
+sections.forEach(section => container.appendChild(section));
+// Остальные секции тоже добавляем в этот контейнер
             const sections = order.map(id => document.getElementById(id)).filter(el => el);
             if (sections.length === 0) return false;
             sections.forEach(section => container.appendChild(section));
@@ -62,7 +63,7 @@ const SidebarEditor = (function() {
     // Включение режима редактирования
     function enableEditMode() {
         if (sortable) sortable.destroy();
-        const container = document.querySelector('.sidebar');
+        const container = document.getElementById('sidebarSectionsContainer');
         sortable = new Sortable(container, {
             handle: '.section-header',
             animation: 150,
