@@ -1186,3 +1186,41 @@ input:focus, select:focus, textarea:focus {
         display: none;
     }
 }
+/* Карусель – кнопки за пределами контейнера */
+.swiper-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+.swiper-button-prev,
+.swiper-button-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    z-index: 10;
+    cursor: pointer;
+    background: var(--bg-panel);
+    border-radius: 50%;
+    box-shadow: var(--shadow);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.swiper-button-prev {
+    left: -20px;
+}
+.swiper-button-next {
+    right: -20px;
+}
+@media (max-width: 768px) {
+    .swiper-button-prev {
+        left: 5px;
+    }
+    .swiper-button-next {
+        right: 5px;
+    }
+}
