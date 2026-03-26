@@ -713,3 +713,80 @@ input:focus, select:focus, textarea:focus {
     padding: 4px 0;
     border-bottom: 1px dashed var(--border-light);
 }
+/* Виджет срочных проектов */
+.urgent-widget, .meetings-widget {
+    background: var(--bg-panel);
+    backdrop-filter: blur(12px);
+    border-radius: 32px;
+    padding: 20px;
+    margin-bottom: 28px;
+    border: 1px solid var(--border-light);
+}
+.urgent-list {
+    margin-top: 12px;
+}
+.urgent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+.urgent-name {
+    font-weight: 500;
+}
+.urgent-status {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+.upcoming-meetings {
+    margin-top: 12px;
+}
+.meeting-item {
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border-light);
+    font-size: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+}
+.meeting-date {
+    font-weight: 500;
+    color: var(--accent);
+}
+.meeting-subject {
+    flex: 1;
+}
+.meeting-project {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+.widget-section {
+    margin-bottom: 32px;
+}
+.widget-section h3 {
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+}
+.projects-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+}
+.project-card {
+    margin-bottom: 0;
+    height: fit-content;
+}
+.project-details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 0.8rem;
+    margin: 12px 0 8px;
+}
+@media (max-width: 768px) {
+    .projects-cards-container {
+        grid-template-columns: 1fr;
+    }
+}
