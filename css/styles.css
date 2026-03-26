@@ -1316,3 +1316,40 @@ input:focus, select:focus, textarea:focus {
     font-size: 0.85rem;
     white-space: nowrap;
 }
+/* Редактируемые поля – визуальный отклик */
+.editable-field {
+    transition: all 0.2s ease;
+}
+.editable-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+    outline: none;
+}
+.editable-field:hover {
+    background: var(--card-bg);
+    cursor: text;
+}
+
+/* Плавное изменение прогресса */
+.progress-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    background: var(--card-bg);
+    border-radius: 20px;
+    height: 6px;
+    outline: none;
+    transition: background 0.2s;
+}
+.progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: var(--shadow);
+}
+.progress-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
