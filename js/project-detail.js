@@ -71,6 +71,18 @@ const ProjectDetail = (function() {
         return next[status] || null;
     }
 
+    // Автоматический прогресс в зависимости от статуса
+    function getProgressByStatus(status) {
+        switch (status) {
+            case 'presale': return 10;
+            case 'design': return 30;
+            case 'ready': return 60;
+            case 'construction': return 80;
+            case 'done': return 100;
+            default: return 0;
+        }
+    }
+
     function renderDetail() {
         if (!currentProject) return;
         const container = document.getElementById('projectDetailContainer');
@@ -78,6 +90,7 @@ const ProjectDetail = (function() {
 
         const p = currentProject;
         const nextStatus = getNextStatusText(p.status);
+        const progress = getProgressByStatus(p.status);
 
         container.innerHTML = `
             <div class="dashboard-wrapper" style="max-width: 800px; margin: 0 auto;">
@@ -86,7 +99,11 @@ const ProjectDetail = (function() {
                 </button>
                 <div class="project-detail-card">
                     <div class="detail-header">
-                        <input type="text" id="projectName" value="${escapeHtml(p.name)}" class="detail-title">
+                        <div class="editable-title">
+                            <span id="projectNameDisplay" class="detail-title">${escapeHtml(p.name)}</span>
+                            <button id="editNameBtn" class="edit-name-btn" title="Редактировать название"><i class="fas fa-pencil-alt"></i></button>
+                            <input type="text" id="projectNameInput" style="display: none;" value="${escapeHtml(p.name)}">
+                        </div>
                         <div class="detail-badges">
                             <select id="projectStatus" class="detail-status">
                                 <option value="presale" ${p.status === 'presale' ? 'selected' : ''}>Пресейл</option>
@@ -121,8 +138,11 @@ const ProjectDetail = (function() {
                     </div>
 
                     <div class="detail-progress">
-                        <label>Прогресс: <span id="progressValue">${p.progress}%</span></label>
-                        <input type="range" id="projectProgress" min="0" max="100" step="5" value="${p.progress}">
+                        <label>Прогресс: <span id="progressValue">${progress}%</span></label>
+                        <div class="progress-bar-static">
+                            <div class="progress-fill" style="width: ${progress}%; background: ${p.priority ? '#f97316' : 'var(--accent)'}"></div>
+                        </div>
+                        <div class="progress-note">Прогресс рассчитывается автоматически на основе статуса проекта.</div>
                     </div>
 
                     <div class="detail-roadmap">
@@ -157,8 +177,13 @@ const ProjectDetail = (function() {
                                 <div class="list-item" data-idx="${idx}">
                                     <input type="text" value="${escapeHtml(pr.name)}" class="purchase-name" data-idx="${idx}">
                                     <select class="purchase-status" data-idx="${idx}">
-                                        <option value="ordered" ${pr.status === 'ordered' ? 'selected' : ''}>Заказано</option>
+                                        <option value="awaiting_payment" ${pr.status === 'awaiting_payment' ? 'selected' : ''}>Ожидает оплаты</option>
+                                        <option value="paid" ${pr.status === 'paid' ? 'selected' : ''}>Оплачено</option>
+                                        <option value="reserved" ${pr.status === 'reserved' ? 'selected' : ''}>Зарезервировано</option>
+                                        <option value="in_transit" ${pr.status === 'in_transit' ? 'selected' : ''}>В пути</option>
                                         <option value="delivered" ${pr.status === 'delivered' ? 'selected' : ''}>Доставлено</option>
+                                        <option value="cancelled" ${pr.status === 'cancelled' ? 'selected' : ''}>Отменено</option>
+                                        <option value="out_of_stock" ${pr.status === 'out_of_stock' ? 'selected' : ''}>Нет в наличии</option>
                                     </select>
                                     <input type="date" value="${pr.date}" class="purchase-date" data-idx="${idx}">
                                     <button class="remove-item" data-type="purchase" data-idx="${idx}"><i class="fas fa-trash-alt"></i></button>
@@ -183,13 +208,42 @@ const ProjectDetail = (function() {
         document.getElementById('backToProjectsBtn')?.addEventListener('click', hideDetail);
         document.getElementById('saveProjectBtn')?.addEventListener('click', saveChanges);
         document.getElementById('deleteProjectBtn')?.addEventListener('click', () => deleteProject(currentProject.id));
-        document.getElementById('projectProgress')?.addEventListener('input', (e) => {
-            document.getElementById('progressValue').innerText = e.target.value + '%';
+        document.getElementById('projectStatus')?.addEventListener('change', () => {
+            // при смене статуса обновляем прогресс (отображение)
+            const progress = getProgressByStatus(document.getElementById('projectStatus').value);
+            document.getElementById('progressValue').innerText = progress + '%';
+            const fill = document.querySelector('.detail-progress .progress-fill');
+            if (fill) fill.style.width = progress + '%';
         });
         document.getElementById('projectBudget')?.addEventListener('blur', (e) => {
             const val = parseCurrency(e.target.value);
             e.target.value = formatCurrency(val);
         });
+
+        // Редактирование названия
+        const nameDisplay = document.getElementById('projectNameDisplay');
+        const nameInput = document.getElementById('projectNameInput');
+        const editBtn = document.getElementById('editNameBtn');
+        if (editBtn && nameDisplay && nameInput) {
+            editBtn.addEventListener('click', () => {
+                nameDisplay.style.display = 'none';
+                nameInput.style.display = 'inline-block';
+                nameInput.focus();
+                nameInput.select();
+            });
+            nameInput.addEventListener('blur', () => {
+                nameDisplay.innerText = nameInput.value;
+                nameDisplay.style.display = 'inline-block';
+                nameInput.style.display = 'none';
+            });
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    nameDisplay.innerText = nameInput.value;
+                    nameDisplay.style.display = 'inline-block';
+                    nameInput.style.display = 'none';
+                }
+            });
+        }
 
         document.querySelectorAll('.add-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -199,7 +253,7 @@ const ProjectDetail = (function() {
                     currentProject.meetings.push({ date: new Date().toISOString().slice(0,10), subject: 'Новая встреча' });
                 } else if (type === 'purchase') {
                     if (!currentProject.purchases) currentProject.purchases = [];
-                    currentProject.purchases.push({ name: 'Новая закупка', status: 'ordered', date: new Date().toISOString().slice(0,10) });
+                    currentProject.purchases.push({ name: 'Новая закупка', status: 'awaiting_payment', date: new Date().toISOString().slice(0,10) });
                 }
                 renderDetail();
             });
@@ -222,21 +276,24 @@ const ProjectDetail = (function() {
     function saveChanges() {
         if (!currentProject) return;
 
-        // Получаем значения полей
-        currentProject.name = document.getElementById('projectName').value;
+        // Название (из поля ввода, если было редактирование)
+        const nameInput = document.getElementById('projectNameInput');
+        const name = nameInput && nameInput.style.display !== 'none' ? nameInput.value : document.getElementById('projectNameDisplay').innerText;
+        currentProject.name = name;
+
         currentProject.status = document.getElementById('projectStatus').value;
         currentProject.priority = document.getElementById('projectPriority').checked;
         currentProject.budget = parseCurrency(document.getElementById('projectBudget').value);
         currentProject.startDate = document.getElementById('projectStartDate').value;
         currentProject.engineer = document.getElementById('projectEngineer').value;
         currentProject.projectManager = document.getElementById('projectManager').value;
-        currentProject.progress = parseInt(document.getElementById('projectProgress').value);
+        // прогресс вычисляется автоматически, не сохраняем из формы
         currentProject.nextStatusDate = document.getElementById('nextStatusDate')?.value || null;
 
         // Сохраняем встречи
         const meetings = [];
         const meetingItems = document.querySelectorAll('#meetingsList .list-item');
-        meetingItems.forEach((item, idx) => {
+        meetingItems.forEach((item) => {
             const dateInput = item.querySelector('.meeting-date');
             const subjectInput = item.querySelector('.meeting-subject');
             if (dateInput && subjectInput) {
@@ -248,7 +305,7 @@ const ProjectDetail = (function() {
         // Сохраняем закупки
         const purchases = [];
         const purchaseItems = document.querySelectorAll('#purchasesList .list-item');
-        purchaseItems.forEach((item, idx) => {
+        purchaseItems.forEach((item) => {
             const nameInput = item.querySelector('.purchase-name');
             const statusSelect = item.querySelector('.purchase-status');
             const dateInput = item.querySelector('.purchase-date');
