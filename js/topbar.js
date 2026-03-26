@@ -1,62 +1,28 @@
 // topbar.js
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
-    let projects = []; // массив проектов
+    let projects = [];
 
-    // Загрузка проектов из localStorage
+    console.log('topbar.js loaded');
+
     function loadProjects() {
         const saved = localStorage.getItem('sputnik_projects');
         if (saved) {
             try {
                 projects = JSON.parse(saved);
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         }
         if (!projects.length) {
-            // Пример проекта для демонстрации
             projects = [
-                { id: '1', name: 'Конференц-зал 1', status: 'design', progress: 45, date: '2026-03-20', team: ['Иванов', 'Петров'] },
-                { id: '2', name: 'Ситуационный центр', status: 'presale', progress: 20, date: '2026-03-25', team: ['Сидоров'] }
+                { id: '1', name: 'Конференц-зал 1', status: 'design', progress: 45, date: '2026-03-20', team: ['Иванов', 'Петров'], meetings: [] },
+                { id: '2', name: 'Ситуационный центр', status: 'presale', progress: 20, date: '2026-03-25', team: ['Сидоров'], meetings: [] }
             ];
+            saveProjects();
         }
-        saveProjects();
     }
 
     function saveProjects() {
         localStorage.setItem('sputnik_projects', JSON.stringify(projects));
-    }
-
-    // Рендеринг дашборда
-    function renderDashboard() {
-        document.getElementById('dashboardProjectsCount').innerText = projects.length;
-        const totalProgress = projects.reduce((sum, p) => sum + p.progress, 0);
-        const avgProgress = projects.length ? Math.round(totalProgress / projects.length) : 0;
-        document.getElementById('dashboardAvgProgress').innerText = avgProgress + '%';
-        // Для коллег в сети – заглушка
-        document.getElementById('dashboardTeamCount').innerText = '3';
-
-        const recentList = document.getElementById('recentProjectsList');
-        recentList.innerHTML = projects.slice(0, 5).map(p => `
-            <div class="project-card" data-id="${p.id}">
-                <div class="project-name">${escapeHtml(p.name)}</div>
-                <div class="project-status status-${p.status}">${getStatusText(p.status)}</div>
-                <div class="project-progress">Прогресс: ${p.progress}%</div>
-                <div class="project-date">${p.date}</div>
-                <button class="btn-small open-project" data-id="${p.id}">Открыть</button>
-            </div>
-        `).join('');
-        if (!projects.length) recentList.innerHTML = '<div class="empty-state">Нет проектов. Создайте первый проект.</div>';
-
-        document.querySelectorAll('.open-project').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = btn.dataset.id;
-                const project = projects.find(p => p.id === id);
-                if (project) {
-                    // Переключаемся в раздел "Проекты" и открываем этот проект для редактирования
-                    switchToSection('projects');
-                    renderProjectsList(project.id);
-                }
-            });
-        });
     }
 
     function getStatusText(status) {
@@ -64,8 +30,57 @@ const TopbarModule = (function() {
         return statuses[status] || status;
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderDashboard() {
+        const projectsCountEl = document.getElementById('dashboardProjectsCount');
+        const avgProgressEl = document.getElementById('dashboardAvgProgress');
+        const teamCountEl = document.getElementById('dashboardTeamCount');
+        const recentList = document.getElementById('recentProjectsList');
+
+        if (projectsCountEl) projectsCountEl.innerText = projects.length;
+        const totalProgress = projects.reduce((sum, p) => sum + p.progress, 0);
+        const avgProgress = projects.length ? Math.round(totalProgress / projects.length) : 0;
+        if (avgProgressEl) avgProgressEl.innerText = avgProgress + '%';
+        if (teamCountEl) teamCountEl.innerText = '3';
+
+        if (recentList) {
+            recentList.innerHTML = projects.slice(0, 5).map(p => `
+                <div class="project-card" data-id="${p.id}">
+                    <div class="project-name">${escapeHtml(p.name)}</div>
+                    <div class="project-status status-${p.status}">${getStatusText(p.status)}</div>
+                    <div class="project-progress">Прогресс: ${p.progress}%</div>
+                    <div class="project-date">${p.date}</div>
+                    <button class="btn-small open-project" data-id="${p.id}">Открыть</button>
+                </div>
+            `).join('');
+            if (!projects.length) recentList.innerHTML = '<div class="empty-state">Нет проектов. Создайте первый проект.</div>';
+        }
+
+        document.querySelectorAll('.open-project').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.dataset.id;
+                const project = projects.find(p => p.id === id);
+                if (project) {
+                    switchToSection('projects');
+                    renderProjectsList(id);
+                }
+            });
+        });
+    }
+
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
+        if (!container) return;
+
         container.innerHTML = projects.map(p => `
             <div class="project-card" data-id="${p.id}">
                 <div class="project-header">
@@ -89,7 +104,7 @@ const TopbarModule = (function() {
                     <div class="meetings-list" id="meetings-${p.id}">
                         <h4>Встречи</h4>
                         <div class="meetings-container">
-                            ${(p.meetings || []).map(m => `<div class="meeting-item">${m.date} — ${m.subject} <button class="remove-meeting" data-id="${p.id}" data-meeting-idx="${p.meetings.indexOf(m)}"><i class="fas fa-times"></i></button></div>`).join('')}
+                            ${(p.meetings || []).map((m, idx) => `<div class="meeting-item">${m.date} — ${m.subject} <button class="remove-meeting" data-id="${p.id}" data-meeting-idx="${idx}"><i class="fas fa-times"></i></button></div>`).join('')}
                         </div>
                         <button class="btn-small add-meeting" data-id="${p.id}"><i class="fas fa-plus"></i> Добавить встречу</button>
                     </div>
@@ -98,7 +113,6 @@ const TopbarModule = (function() {
         `).join('');
         if (!projects.length) container.innerHTML = '<div class="empty-state">Нет проектов. Нажмите "Новый проект".</div>';
 
-        // Обработчики
         document.querySelectorAll('.edit-project').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
@@ -201,16 +215,17 @@ const TopbarModule = (function() {
         }
     }
 
-    // Шаблоны
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
-        projectSelect.innerHTML = '<option value="">— Не привязывать —</option>' + projects.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+        if (projectSelect) {
+            projectSelect.innerHTML = '<option value="">— Не привязывать —</option>' + projects.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+        }
     }
 
     function generateDocument() {
-        const templateType = document.getElementById('templateSelect').value;
+        const templateType = document.getElementById('templateSelect')?.value || 'explanatory';
         const selectedSubsystems = Array.from(document.querySelectorAll('#subsystemsChecklist input:checked')).map(cb => cb.value);
-        const projectId = document.getElementById('templateProjectSelect').value;
+        const projectId = document.getElementById('templateProjectSelect')?.value;
         const project = projects.find(p => p.id === projectId);
         let content = '';
 
@@ -252,64 +267,59 @@ const TopbarModule = (function() {
 
         const previewDiv = document.getElementById('documentPreview');
         const previewContent = document.getElementById('previewContent');
-        previewContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace;">${escapeHtml(content)}</pre>`;
-        previewDiv.style.display = 'block';
-        document.getElementById('copyDocBtn').onclick = () => {
-            navigator.clipboard.writeText(content);
-            alert('Текст скопирован');
-        };
+        if (previewDiv && previewContent) {
+            previewContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace;">${escapeHtml(content)}</pre>`;
+            previewDiv.style.display = 'block';
+            document.getElementById('copyDocBtn').onclick = () => {
+                navigator.clipboard.writeText(content);
+                alert('Текст скопирован');
+            };
+        }
     }
 
     function switchToSection(section) {
+        console.log('switchToSection:', section);
         currentSection = section;
-        // Обновляем активную кнопку в топбаре
         document.querySelectorAll('.topbar-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.section === section);
         });
-        // Показываем нужный контейнер
         document.querySelectorAll('.section-container').forEach(container => {
             container.classList.toggle('active', container.id === `${section}Container`);
         });
-        // Скрываем или показываем сайдбар
         const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
         if (section === 'calculations') {
-            sidebar.classList.remove('hidden');
-            document.querySelector('.main-content').classList.remove('full-width');
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (mainContent) mainContent.classList.remove('full-width');
         } else {
-            sidebar.classList.add('hidden');
-            document.querySelector('.main-content').classList.add('full-width');
+            if (sidebar) sidebar.classList.add('hidden');
+            if (mainContent) mainContent.classList.add('full-width');
         }
-        // Рендерим содержимое раздела при необходимости
         if (section === 'dashboard') renderDashboard();
         if (section === 'projects') renderProjectsList();
         if (section === 'templates') renderTemplates();
     }
 
     function init() {
+        console.log('TopbarModule.init() called');
         loadProjects();
         renderDashboard();
 
-        // Обработчики кнопок топбара
-        document.querySelectorAll('.topbar-btn').forEach(btn => {
+        const btns = document.querySelectorAll('.topbar-btn');
+        console.log('Найдено кнопок топбара:', btns.length);
+        btns.forEach(btn => {
             btn.addEventListener('click', () => {
+                console.log('Нажата кнопка:', btn.dataset.section);
                 switchToSection(btn.dataset.section);
             });
         });
-        document.getElementById('createProjectBtn')?.addEventListener('click', createNewProject);
-        document.getElementById('generateDocBtn')?.addEventListener('click', generateDocument);
 
-        // Начальное состояние – дашборд
+        const createBtn = document.getElementById('createProjectBtn');
+        if (createBtn) createBtn.addEventListener('click', createNewProject);
+        const generateBtn = document.getElementById('generateDocBtn');
+        if (generateBtn) generateBtn.addEventListener('click', generateDocument);
+
         switchToSection('dashboard');
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
     }
 
     return { init };
