@@ -1,4 +1,4 @@
-// topbar.js
+// topbar.js (финальная версия)
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -333,16 +333,16 @@ const TopbarModule = (function() {
                                     <th>Статус</th>
                                     <th>Прогресс</th>
                                     <th>Начало</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody>
                                 ${filteredProjects.map(p => `
                                     <tr style="cursor:pointer;" class="project-row" data-id="${p.id}">
-                                        <td>${escapeHtml(p.name)}</td>
-                                        <td>${getStatusText(p.status)}</td>
-                                        <td>${p.progress}%</td>
-                                        <td>${p.startDate}</td>
-                                    </tr>
+                                         <td>${escapeHtml(p.name)}</td>
+                                         <td>${getStatusText(p.status)}</td>
+                                         <td>${p.progress}%</td>
+                                         <td>${p.startDate}</td>
+                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
@@ -628,19 +628,15 @@ const TopbarModule = (function() {
         const detailContainer = document.getElementById('projectDetailContainer');
 
         if (section !== 'projects') {
-            // Скрываем оба контейнера проектов
             if (projectsContainer) projectsContainer.style.display = 'none';
             if (detailContainer) {
                 detailContainer.style.display = 'none';
-                // Очищаем содержимое, чтобы удалить любые остатки
                 detailContainer.innerHTML = '';
             }
-            // Если детальная страница была открыта, вызываем её метод hideDetail для сброса состояния
             if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
                 ProjectDetail.hideDetail();
             }
         } else {
-            // Показываем список проектов
             if (projectsContainer) projectsContainer.style.display = 'block';
             if (detailContainer) detailContainer.style.display = 'none';
             renderProjectsList();
