@@ -1,4 +1,4 @@
-// topbar.js – дашборд с единой карточкой статистики
+// topbar.js
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
@@ -109,7 +109,7 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
-    // ========== ОБЩАЯ СТАТИСТИКА (ОДНА КАРТОЧКА) ==========
+    // ========== ОБЩАЯ СТАТИСТИКА ==========
     function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
@@ -136,6 +136,34 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ (КАРТОЧКА) ==========
+    function renderUrgentWidget() {
+        const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
+        const container = document.getElementById('urgentProjectsWidget');
+        if (!container) return;
+        if (urgentProjects.length === 0) {
+            container.innerHTML = `
+                <div class="project-header">
+                    <div class="project-name">Срочные проекты</div>
+                </div>
+                <div class="empty-state">Нет срочных проектов</div>
+            `;
+            return;
+        }
+        container.innerHTML = `
+            <div class="project-header">
+                <div class="project-name">Срочные проекты</div>
+                <div class="project-status urgent-stat">${urgentProjects.length}</div>
+            </div>
+            ${urgentProjects.map(p => `
+                <div class="urgent-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light);">
+                    <span class="urgent-name">${escapeHtml(p.name)}</span>
+                    <span class="urgent-status ${getStatusColor(p.status)}">${getStatusText(p.status)}</span>
+                </div>
+            `).join('')}
+        `;
+    }
+
     // ========== ВИДЖЕТ ВСТРЕЧ (КАРТОЧКА) ==========
     function renderMeetingsWidget() {
         const allMeetings = [];
@@ -153,49 +181,21 @@ const TopbarModule = (function() {
         allMeetings.sort((a, b) => new Date(a.date) - new Date(b.date));
         const upcoming = allMeetings.slice(0, 3);
         const totalMeetings = allMeetings.length;
-
         const container = document.getElementById('meetingsWidget');
         if (!container) return;
         container.innerHTML = `
-            <div class="widget-header">
-                <span class="stat-number">${totalMeetings}</span>
-                <span class="stat-label">всего встреч</span>
+            <div class="project-header">
+                <div class="project-name">Встречи</div>
+                <div class="project-status">${totalMeetings}</div>
             </div>
-            <div class="upcoming-meetings">
-                ${upcoming.map(m => `
-                    <div class="meeting-item">
-                        <span class="meeting-date">${m.date}</span>
-                        <span class="meeting-subject">${escapeHtml(m.subject)}</span>
-                        <span class="meeting-project">${escapeHtml(m.projectName)}</span>
-                    </div>
-                `).join('')}
-                ${upcoming.length === 0 ? '<div class="meeting-item">Нет предстоящих встреч</div>' : ''}
-            </div>
-        `;
-    }
-
-    // ========== ВИДЖЕТ СРОЧНЫХ ПРОЕКТОВ (КАРТОЧКА) ==========
-    function renderUrgentWidget() {
-        const urgentProjects = projects.filter(p => p.priority === true && p.status !== 'done');
-        const container = document.getElementById('urgentProjectsWidget');
-        if (!container) return;
-        if (urgentProjects.length === 0) {
-            container.innerHTML = '<div class="widget-header"><span class="stat-number">0</span><span class="stat-label">срочных проектов</span></div><div class="no-urgent">Нет срочных проектов</div>';
-            return;
-        }
-        container.innerHTML = `
-            <div class="widget-header">
-                <span class="stat-number">${urgentProjects.length}</span>
-                <span class="stat-label">срочных проектов</span>
-            </div>
-            <div class="urgent-list">
-                ${urgentProjects.map(p => `
-                    <div class="urgent-item">
-                        <span class="urgent-name">${escapeHtml(p.name)}</span>
-                        <span class="urgent-status ${getStatusColor(p.status)}">${getStatusText(p.status)}</span>
-                    </div>
-                `).join('')}
-            </div>
+            ${upcoming.map(m => `
+                <div class="meeting-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border-light);">
+                    <span class="meeting-date">${m.date}</span>
+                    <span class="meeting-subject">${escapeHtml(m.subject)}</span>
+                    <span class="meeting-project">${escapeHtml(m.projectName)}</span>
+                </div>
+            `).join('')}
+            ${upcoming.length === 0 ? '<div class="empty-state">Нет предстоящих встреч</div>' : ''}
         `;
     }
 
@@ -305,6 +305,7 @@ const TopbarModule = (function() {
         if (section === 'templates') renderTemplates();
     }
 
+    // ========== ПРОЕКТЫ (список) ==========
     function renderProjectsList(activeId = null) {
         const container = document.getElementById('projectsList');
         if (!container) return;
@@ -342,6 +343,7 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
