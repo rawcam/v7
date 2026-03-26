@@ -206,6 +206,80 @@ const TopbarModule = (function() {
                 });
             }
         });
+
+  function renderWorkloadWidget() {
+    // Собираем данные
+    const engineers = {};
+    const managers = {};
+
+    projects.forEach(project => {
+        const isActive = project.status !== 'done';
+        if (project.engineer && isActive) {
+            engineers[project.engineer] = (engineers[project.engineer] || 0) + 1;
+        }
+        if (project.projectManager && isActive) {
+            managers[project.projectManager] = (managers[project.projectManager] || 0) + 1;
+        }
+    });
+
+    // Определяем максимальную загрузку для прогресс-бара
+    const maxEngineerLoad = Math.max(...Object.values(engineers), 1);
+    const maxManagerLoad = Math.max(...Object.values(managers), 1);
+
+    // Формируем HTML
+    let engineersHtml = '';
+    for (const [name, count] of Object.entries(engineers).sort((a,b) => b[1] - a[1])) {
+        const percent = (count / maxEngineerLoad) * 100;
+        engineersHtml += `
+            <div class="workload-item">
+                <div class="workload-name">${escapeHtml(name)}</div>
+                <div class="workload-count">${count} проект(ов)</div>
+                <div class="progress-bar-container small">
+                    <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
+                </div>
+            </div>
+        `;
+    }
+    let managersHtml = '';
+    for (const [name, count] of Object.entries(managers).sort((a,b) => b[1] - a[1])) {
+        const percent = (count / maxManagerLoad) * 100;
+        managersHtml += `
+            <div class="workload-item">
+                <div class="workload-name">${escapeHtml(name)}</div>
+                <div class="workload-count">${count} проект(ов)</div>
+                <div class="progress-bar-container small">
+                    <div class="progress-fill" style="width: ${percent}%; background: var(--accent);"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    const totalActive = projects.filter(p => p.status !== 'done').length;
+    const avgEngineerLoad = Object.values(engineers).length ? (Object.values(engineers).reduce((a,b) => a+b,0) / Object.values(engineers).length).toFixed(1) : 0;
+    const avgManagerLoad = Object.values(managers).length ? (Object.values(managers).reduce((a,b) => a+b,0) / Object.values(managers).length).toFixed(1) : 0;
+
+    const container = document.getElementById('workloadWidget');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="project-header">
+            <div class="project-name">Загрузка сотрудников</div>
+        </div>
+        <div class="workload-stats">
+            <div class="stat-summary">Активных проектов: <strong>${totalActive}</strong></div>
+            <div class="stat-summary">Средняя загрузка инженеров: <strong>${avgEngineerLoad}</strong> проект(ов)</div>
+            <div class="stat-summary">Средняя загрузка РП: <strong>${avgManagerLoad}</strong> проект(ов)</div>
+        </div>
+        <details class="workload-details">
+            <summary>Инженеры</summary>
+            <div class="workload-list">${engineersHtml || '<div>Нет активных проектов</div>'}</div>
+        </details>
+        <details class="workload-details">
+            <summary>Руководители проектов</summary>
+            <div class="workload-list">${managersHtml || '<div>Нет активных проектов</div>'}</div>
+        </details>
+    `;
+}  
         allMeetings.sort((a, b) => new Date(a.date) - new Date(b.date));
         const upcoming = allMeetings.slice(0, 3);
         const totalMeetings = allMeetings.length;
