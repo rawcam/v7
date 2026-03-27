@@ -1260,6 +1260,3 @@ input:focus, select:focus, textarea:focus {
     display: flex;
     flex-direction: column;
 }
-.active-path-container > :first-child {
-    margin-top: 0 !important;
-}
