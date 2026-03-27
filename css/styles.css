@@ -414,13 +414,17 @@ a:hover {
 /* Сетка для всех карточек на главной */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 24px;
     margin: 32px 0;
 }
-
 .dashboard-grid .project-card {
     margin-bottom: 0;
+}
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
 }
 
 /* Центровка заголовков */
@@ -993,6 +997,79 @@ input:focus, select:focus, textarea:focus {
     box-shadow: var(--shadow-hover);
 }
 
+/* ========== ВИДЖЕТ ЗАГРУЗКИ СОТРУДНИКОВ ========== */
+.workload-stats {
+    margin-bottom: 16px;
+}
+.stat-summary {
+    font-size: 0.8rem;
+    margin: 6px 0;
+    color: var(--text-secondary);
+}
+.stat-summary strong {
+    color: var(--accent);
+}
+.workload-details {
+    margin-top: 12px;
+}
+.workload-details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.workload-list {
+    margin-top: 8px;
+}
+.workload-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.workload-name {
+    width: 120px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+.workload-name.clickable {
+    cursor: pointer;
+    transition: color 0.2s;
+    color: var(--accent);
+}
+.workload-name.clickable:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+.workload-count {
+    width: 60px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.progress-bar-container.small {
+    flex: 1;
+    height: 6px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-bar-container.small .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+}
+@media (max-width: 768px) {
+    .workload-name {
+        width: auto;
+        flex: 1;
+    }
+    .workload-count {
+        width: auto;
+        text-align: right;
+    }
+}
+
 /* ========== МОДАЛЬНЫЕ ОКНА ========== */
 .modal {
     display: none;
@@ -1133,166 +1210,4 @@ input:focus, select:focus, textarea:focus {
         align-items: center;
         justify-content: center;
     }
-}
-/* Карусель проектов */
-.swiper-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    padding: 8px 0 40px 0;
-}
-.swiper-button-prev,
-.swiper-button-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    background: var(--bg-panel);
-    border-radius: 50%;
-    backdrop-filter: blur(4px);
-    box-shadow: var(--shadow);
-    z-index: 10;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.swiper-button-prev {
-    left: -20px;
-}
-.swiper-button-next {
-    right: -20px;
-}
-.swiper-button-prev:after,
-.swiper-button-next:after {
-    font-size: 18px;
-    color: var(--accent);
-}
-.swiper-pagination {
-    bottom: 0;
-}
-.swiper-pagination-bullet {
-    background: var(--text-secondary);
-    opacity: 0.5;
-}
-.swiper-pagination-bullet-active {
-    background: var(--accent);
-    opacity: 1;
-}
-@media (max-width: 768px) {
-    .swiper-button-prev,
-    .swiper-button-next {
-        display: none;
-    }
-}
-/* Карусель – кнопки за пределами контейнера */
-.swiper-container {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-}
-.swiper-button-prev,
-.swiper-button-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 44px;
-    height: 44px;
-    margin-top: -22px;
-    z-index: 10;
-    cursor: pointer;
-    background: var(--bg-panel);
-    border-radius: 50%;
-    box-shadow: var(--shadow);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.swiper-button-prev {
-    left: -20px;
-}
-.swiper-button-next {
-    right: -20px;
-}
-@media (max-width: 768px) {
-    .swiper-button-prev {
-        left: 5px;
-    }
-    .swiper-button-next {
-        right: 5px;
-    }
-}
-/* Виджет загрузки сотрудников */
-.workload-stats {
-    margin-bottom: 16px;
-}
-.stat-summary {
-    font-size: 0.8rem;
-    margin: 6px 0;
-    color: var(--text-secondary);
-}
-.stat-summary strong {
-    color: var(--accent);
-}
-.workload-details {
-    margin-top: 12px;
-}
-.workload-details summary {
-    cursor: pointer;
-    color: var(--accent);
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-bottom: 8px;
-}
-.workload-list {
-    margin-top: 8px;
-}
-.workload-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-}
-.workload-name {
-    width: 120px;
-    font-weight: 500;
-    font-size: 0.8rem;
-}
-.workload-count {
-    width: 60px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-.progress-bar-container.small {
-    flex: 1;
-    height: 6px;
-    background: var(--card-bg);
-    border-radius: 10px;
-    overflow: hidden;
-}
-.progress-bar-container.small .progress-fill {
-    height: 100%;
-    border-radius: 10px;
-}
-@media (max-width: 768px) {
-    .workload-name {
-        width: auto;
-        flex: 1;
-    }
-    .workload-count {
-        width: auto;
-        text-align: right;
-    }
-}
-.workload-name.clickable {
-    cursor: pointer;
-    transition: color 0.2s;
-    color: var(--accent);
-}
-.workload-name.clickable:hover {
-    text-decoration: underline;
-    opacity: 0.8;
 }
