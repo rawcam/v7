@@ -243,18 +243,30 @@
 <script src="js/app.js"></script>
 
 <!-- Инициализация дашборда после полной загрузки -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Если функция updateDashboard определена, вызываем её
-        if (typeof updateDashboard === 'function') {
-            updateDashboard();
-        } else {
-            console.warn('updateDashboard not defined, check app.js');
-        }
-        // Если нужна карусель, можно инициализировать её здесь
-        if (typeof initProjectsCarousel === 'function') {
-            initProjectsCarousel();
-        }
+<div id="dashboardContainer" class="section-container active">
+    <div class="dashboard-wrapper">
+        <h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>
+        <div class="stats-card" id="statsCard"></div>
+        <div class="dashboard-grid">
+            <div class="project-card" id="budgetWidget"></div>
+            <div class="project-card" id="progressWidget"></div>
+            <div class="project-card" id="urgentProjectsWidget"></div>
+            <div class="project-card" id="meetingsWidget"></div>
+            <div class="project-card" id="workloadWidget"></div>
+        </div>
+        <div class="widget-section">
+            <h3>Активные проекты</h3>
+            <div class="projects-swiper-wrapper">
+                <div class="swiper-container" id="projectsSwiperContainer">
+                    <div class="swiper-wrapper" id="projectCardsContainer"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     });
 </script>
 </body>
