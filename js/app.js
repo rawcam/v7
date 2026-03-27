@@ -2,34 +2,27 @@
 (function() {
     let calculationsInitialized = false;
 
-    // Модули, которые не зависят от сайдбара
+    // Модули, не зависящие от сайдбара
     if (typeof LoggerModule !== 'undefined') LoggerModule.init();
     if (typeof StorageModule !== 'undefined') StorageModule.init();
 
-    // Инициализация топбара (если используется TopbarModule)
-    if (typeof TopbarModule !== 'undefined') {
-        TopbarModule.init();
-    } else {
-        console.warn('TopbarModule not loaded, but topbar may work via direct switchToSection');
-    }
-
-    // ========== ФУНКЦИИ ДАШБОРДА ==========
-    function updateDashboard() {
+    // Функция обновления дашборда (виджеты)
+    window.updateDashboard = function() {
         console.log('updateDashboard called');
         const projects = window.appState?.projects || [];
         if (!projects.length) {
             console.warn('No projects found');
-            // Можно заполнить заглушки
-            document.getElementById('statsCard').innerHTML = '<div class="stats-grid"><div class="stat-item"><span class="stat-label">Всего</span><span class="stat-number">0</span></div></div>';
+            // Заполняем пустыми данными, чтобы виджеты не были пустыми
+            document.getElementById('statsCard').innerHTML = '<div class="stats-grid"><div class="stat-item"><span class="stat-label">Нет проектов</span><span class="stat-number">0</span></div></div>';
             document.getElementById('budgetWidget').innerHTML = '<div class="widget-value">0 ₽</div><div class="stat-label">Общий бюджет</div>';
             document.getElementById('progressWidget').innerHTML = '<div class="widget-value">0%</div><div class="stat-label">Средний прогресс</div>';
-            document.getElementById('urgentProjectsWidget').innerHTML = '<div class="widget-value">0</div><div class="stat-label">Срочные</div>';
+            document.getElementById('urgentProjectsWidget').innerHTML = '<div class="widget-value">0</div><div class="stat-label">Срочные проекты</div>';
             document.getElementById('meetingsWidget').innerHTML = '<div class="widget-value">0</div><div class="stat-label">Встречи</div>';
             document.getElementById('workloadWidget').innerHTML = '<div class="widget-value">—</div><div class="stat-label">Загрузка</div>';
             return;
         }
 
-        // Общая статистика
+        // Статистика
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'Архив' && p.status !== 'Сдан').length;
         const awaitingPayment = projects.filter(p => p.status === 'Ожидает оплату').length;
@@ -53,7 +46,7 @@
         `;
         document.getElementById('statsCard').innerHTML = statsHtml;
 
-        // Общий бюджет активных проектов
+        // Бюджет активных проектов
         const totalBudget = projects.filter(p => p.status !== 'Архив' && p.status !== 'Сдан')
             .reduce((sum, p) => sum + (p.budget || 0), 0);
         document.getElementById('budgetWidget').innerHTML = `
@@ -61,26 +54,24 @@
             <div class="stat-label">Общий бюджет активных проектов</div>
         `;
 
-        // Средний прогресс (пример: по статусу)
+        // Средний прогресс (на основе статуса)
         const progressMap = { 'Активный': 30, 'Стадия П': 50, 'Стадия Р': 70, 'Монтаж': 85, 'Сдан': 100 };
-        const avgProgress = projects.filter(p => p.status !== 'Архив').length
-            ? Math.round(projects.filter(p => p.status !== 'Архив').reduce((sum, p) => sum + (progressMap[p.status] || 0), 0) / projects.filter(p => p.status !== 'Архив').length)
-            : 0;
+        const activeProjects = projects.filter(p => p.status !== 'Архив');
+        const avgProgress = activeProjects.length ? Math.round(activeProjects.reduce((sum, p) => sum + (progressMap[p.status] || 0), 0) / activeProjects.length) : 0;
         document.getElementById('progressWidget').innerHTML = `
             <div class="widget-value">${avgProgress}%</div>
             <div class="stat-label">Средний прогресс</div>
         `;
 
-        // Срочные проекты (список)
+        // Срочные проекты
         const urgentProjects = projects.filter(p => p.priority === 'Срочный');
         let urgentHtml = `<div class="widget-value">${urgentProjects.length}</div><div class="stat-label">Срочные проекты</div>`;
         if (urgentProjects.length) {
-            urgentHtml += `<ul class="urgent-list">${urgentProjects.map(p => `<li>${p.name}</li>`).join('')}</ul>`;
+            urgentHtml += `<ul class="urgent-list">${urgentProjects.map(p => `<li>${escapeHtml(p.name)}</li>`).join('')}</ul>`;
         }
         document.getElementById('urgentProjectsWidget').innerHTML = urgentHtml;
 
-        // Встречи (демо-данные, можно вынести в отдельный массив)
-        // Здесь просто пример
+        // Встречи (заглушка, можно заменить реальными данными)
         const meetings = [
             { title: 'Согласование ТЗ', date: '2026-03-10', place: 'Конференц-зал 1' },
             { title: 'Промежуточный отчёт', date: '2026-03-20', place: 'Конференц-зал 1' }
@@ -88,18 +79,18 @@
         document.getElementById('meetingsWidget').innerHTML = `
             <div class="widget-value">${meetings.length}</div>
             <div class="stat-label">Встречи</div>
-            <ul class="meetings-list">${meetings.map(m => `<li>${m.date} ${m.title}</li>`).join('')}</ul>
+            <ul class="meetings-list">${meetings.map(m => `<li>${m.date} ${escapeHtml(m.title)}</li>`).join('')}</ul>
         `;
 
-        // Загрузка сотрудников (инженеры и РП)
+        // Загрузка сотрудников
         const engineers = {};
         const projectManagers = {};
         projects.forEach(p => {
             if (p.engineer) engineers[p.engineer] = (engineers[p.engineer] || 0) + 1;
             if (p.projectManager) projectManagers[p.projectManager] = (projectManagers[p.projectManager] || 0) + 1;
         });
-        const avgEngineerLoad = projects.length ? (Object.values(engineers).reduce((a,b)=>a+b,0) / Object.keys(engineers).length || 0).toFixed(1) : 0;
-        const avgPmLoad = projects.length ? (Object.values(projectManagers).reduce((a,b)=>a+b,0) / Object.keys(projectManagers).length || 0).toFixed(1) : 0;
+        const avgEngineerLoad = Object.keys(engineers).length ? (Object.values(engineers).reduce((a,b)=>a+b,0) / Object.keys(engineers).length).toFixed(1) : 0;
+        const avgPmLoad = Object.keys(projectManagers).length ? (Object.values(projectManagers).reduce((a,b)=>a+b,0) / Object.keys(projectManagers).length).toFixed(1) : 0;
 
         const workloadHtml = `
             <div class="workload-stats">
@@ -111,7 +102,7 @@
                 <summary>Инженеры</summary>
                 <div class="workload-list">${Object.entries(engineers).map(([name, count]) => `
                     <div class="workload-item">
-                        <span class="workload-name">${name}</span>
+                        <span class="workload-name">${escapeHtml(name)}</span>
                         <span class="workload-count">${count} проект(ов)</span>
                         <div class="progress-bar-container small">
                             <div class="progress-fill" style="width: ${Math.min(100, count * 20)}%; background: var(--accent);"></div>
@@ -123,7 +114,7 @@
                 <summary>Руководители проектов</summary>
                 <div class="workload-list">${Object.entries(projectManagers).map(([name, count]) => `
                     <div class="workload-item">
-                        <span class="workload-name">${name}</span>
+                        <span class="workload-name">${escapeHtml(name)}</span>
                         <span class="workload-count">${count} проект(ов)</span>
                         <div class="progress-bar-container small">
                             <div class="progress-fill" style="width: ${Math.min(100, count * 20)}%; background: var(--accent);"></div>
@@ -133,14 +124,12 @@
             </details>
         `;
         document.getElementById('workloadWidget').innerHTML = workloadHtml;
-    }
+    };
 
-    // Функция инициализации всех модулей, зависящих от сайдбара
+    // Инициализация модулей расчётов (при переходе на вкладку)
     function initCalculationsModules() {
         if (calculationsInitialized) return;
         calculationsInitialized = true;
-        console.log('Initializing calculations modules');
-
         if (typeof Accordion !== 'undefined') Accordion.init();
         if (typeof VideoModule !== 'undefined') VideoModule.init();
         if (typeof NetworkModule !== 'undefined') NetworkModule.init();
@@ -153,7 +142,6 @@
         if (typeof SidebarEditor !== 'undefined') SidebarEditor.init();
     }
 
-    // Следим за переключением на раздел "Расчёты"
     function waitForCalculations() {
         const checkInterval = setInterval(() => {
             const calculationsContainer = document.getElementById('calculationsContainer');
@@ -165,6 +153,7 @@
     }
     waitForCalculations();
 
+    // Тема и сайдбар
     function initTheme() {
         const themeSwitch = document.getElementById('themeSwitch');
         const topbarThemeSwitch = document.getElementById('topbarThemeSwitch');
@@ -181,10 +170,7 @@
                 localStorage.setItem('theme', 'light');
             }
         }
-        const handleClick = () => {
-            const isDark = document.body.classList.contains('dark');
-            setTheme(isDark ? 'light' : 'dark');
-        };
+        const handleClick = () => setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
         if (themeSwitch) themeSwitch.addEventListener('click', handleClick);
         if (topbarThemeSwitch) topbarThemeSwitch.addEventListener('click', handleClick);
         if (localStorage.getItem('theme') === 'dark') setTheme('dark');
@@ -212,9 +198,7 @@
     function initMobileMenu() {
         const sidebar = document.getElementById('sidebar');
         const mobileToggle = document.getElementById('mobileMenuToggle');
-        if (mobileToggle) {
-            mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-        }
+        if (mobileToggle) mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
         document.addEventListener('click', e => {
             if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== mobileToggle) {
                 sidebar.classList.remove('open');
@@ -222,34 +206,34 @@
         });
     }
 
-    // Обработчики кнопок в топбаре
+    // Кнопки сохранения/экспорта
     const topbarSave = document.getElementById('topbarSave');
     const topbarExport = document.getElementById('topbarExport');
+    if (topbarSave && StorageModule?.saveToLocalStorage) topbarSave.addEventListener('click', () => StorageModule.saveToLocalStorage());
+    if (topbarExport && StorageModule?.exportToJson) topbarExport.addEventListener('click', () => StorageModule.exportToJson());
 
-    if (topbarSave && StorageModule && typeof StorageModule.saveToLocalStorage === 'function') {
-        topbarSave.addEventListener('click', () => StorageModule.saveToLocalStorage());
-    }
-    if (topbarExport && StorageModule && typeof StorageModule.exportToJson === 'function') {
-        topbarExport.addEventListener('click', () => StorageModule.exportToJson());
-    }
-
-    // Инициализация UI
     initTheme();
     initSidebarCollapse();
     initMobileMenu();
 
-    // Запуск дашборда после полной загрузки DOM и данных
+    // Запускаем обновление дашборда после загрузки DOM
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            updateDashboard();
+            window.updateDashboard();
         });
     } else {
-        updateDashboard();
+        window.updateDashboard();
     }
 
-    // Делаем функцию доступной глобально, чтобы её могли вызывать другие модули (например, после изменения проекта)
-    window.updateDashboard = updateDashboard;
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
 })();
 
-// Инициализация ProjectDetail, если есть
 if (typeof ProjectDetail !== 'undefined') ProjectDetail.init();
