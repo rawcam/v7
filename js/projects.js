@@ -1,9 +1,8 @@
-// projects.js – полная версия с глобальным состоянием
+// projects.js
 (function() {
-    // Инициализация глобального состояния
+    // Инициализируем глобальное состояние, если его нет
     window.appState = window.appState || {};
     if (!window.appState.projects) {
-        // Тестовые проекты (как в вашем дашборде)
         window.appState.projects = [
             {
                 id: '1',
@@ -36,16 +35,12 @@
                 projectManager: 'Иванов И.И.'
             }
         ];
-        console.log('projects.js: initialized projects', window.appState.projects);
     }
 
-    // Функция рендеринга списка проектов
+    // Рендеринг списка проектов
     window.renderProjectsList = function() {
         const container = document.getElementById('projectsContainer');
-        if (!container) {
-            console.error('projectsContainer not found');
-            return;
-        }
+        if (!container) return;
         const projects = window.appState.projects || [];
         if (!projects.length) {
             container.innerHTML = '<p>Нет проектов. Создайте новый.</p>';
@@ -64,7 +59,6 @@
         `).join('');
     };
 
-    // Функция открытия детальной страницы
     window.openProjectDetail = function(projectId) {
         const project = window.appState.projects.find(p => p.id === projectId);
         if (!project) return;
@@ -81,7 +75,6 @@
         }
     };
 
-    // Функция удаления проекта
     window.deleteProject = function(projectId) {
         if (confirm('Удалить проект?')) {
             window.appState.projects = window.appState.projects.filter(p => p.id !== projectId);
@@ -90,14 +83,12 @@
         }
     };
 
-    // Функция создания нового проекта
     window.createProject = function() {
         const name = prompt('Название проекта:');
         if (!name) return;
         const budget = parseInt(prompt('Бюджет (₽):', '0'), 10) || 0;
         const engineer = prompt('Инженер:') || '';
         const projectManager = prompt('Руководитель проекта:') || '';
-
         const newId = String(Date.now());
         const newProject = {
             id: newId,
@@ -114,7 +105,6 @@
         if (typeof updateDashboard === 'function') updateDashboard();
     };
 
-    // Вспомогательные функции
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -129,13 +119,11 @@
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     }
 
-    // Инициализация: если раздел "Проекты" уже видим, отрисовываем список
     document.addEventListener('DOMContentLoaded', () => {
         const projectsSection = document.getElementById('projects');
         if (projectsSection && projectsSection.style.display !== 'none') {
             renderProjectsList();
         }
-        // Принудительно обновим дашборд, если он ещё не обновился
         if (typeof updateDashboard === 'function') updateDashboard();
     });
 })();
