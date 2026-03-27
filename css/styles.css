@@ -1211,38 +1211,9 @@ input:focus, select:focus, textarea:focus {
         justify-content: center;
     }
 }
-
-/* Центрирование пустого состояния трактов (только для активного раздела) */
-#calculationsContainer.active {
-    min-height: calc(100vh - 64px);
-    display: flex;
-    flex-direction: column;
-}
-#calculationsContainer.active .active-path-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-#calculationsContainer.active .active-path-container .empty-state {
-    max-width: 400px;
-    text-align: center;
-}
-
 /* ========== СКРЫВАЕМ КНОПКИ В САЙДБАРЕ ========== */
 .sidebar-header .theme-switch,
 .sidebar-header .collapse-btn {
     display: none;
 }
-/* Убираем лишнюю высоту в разделе «Расчёты», оставляем содержимое вверху */
-#calculationsContainer.active {
-    min-height: calc(100vh - 64px);
-}
-#calculationsContainer.active .active-path-container {
-    display: block; /* убираем flex, чтобы содержимое не центрировалось */
-}
-#calculationsContainer.active .active-path-container .empty-state {
-    max-width: 400px;
-    text-align: center;
-    margin-top: 20px; /* небольшой отступ от топбара */
-}
+
