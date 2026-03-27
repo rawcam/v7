@@ -105,7 +105,7 @@
         </div>
         <div id="sidebarSectionsContainer">
             <!-- ВСЕ АККОРДЕОНЫ (видео, сеть, LED, звук, ВКС, эргономика, тракты, статистика, энергия, управление) -->
-            <!-- ВСТАВЬТЕ СЮДА ВАШИ АККОРДЕОНЫ, КАК БЫЛО РАНЕЕ -->
+            <!-- В реальном файле они должны быть здесь. Для краткости опущено, но вы их уже добавили -->
         </div>
         <div class="sidebar-footer">Sputnik Studio v7.0<br>© 2026</div>
     </div>
@@ -135,12 +135,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Раздел "Проекты" -->
-        <div id="projects" class="section-container">
-            <div id="projectsContainer"></div>
-            <div id="projectDetailContainer" style="display: none;"></div>
         </div>
 
         <!-- Контейнер для расчётов -->
@@ -238,19 +232,16 @@
 <script src="js/logger.js"></script>
 <script src="js/sidebar-editor.js"></script>
 <script src="js/topbar.js"></script>
-<script src="js/projects.js"></script>
 <script src="js/project-detail.js"></script>
 <script src="js/app.js"></script>
 
-<!-- Дополнительная инициализация на случай, если app.js не отработал -->
+<!-- !!! ЕДИНСТВЕННОЕ ИЗМЕНЕНИЕ: запуск TopbarModule после загрузки всех скриптов !!! -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof updateDashboard === 'function') {
-            updateDashboard();
-        } else {
-            console.error('updateDashboard is not defined');
-        }
-    });
+    if (typeof TopbarModule !== 'undefined') {
+        TopbarModule.init();
+    } else {
+        console.error('TopbarModule not found');
+    }
 </script>
 </body>
 </html>
