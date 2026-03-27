@@ -306,18 +306,19 @@ const ProjectDetail = (function() {
     }
 
     function hideDetail() {
-        const projectsContainer = document.getElementById('projectsContainer');
-        const detailContainer = document.getElementById('projectDetailContainer');
-        if (projectsContainer && detailContainer) {
-            detailContainer.style.display = 'none';
-            projectsContainer.style.display = 'block';
-            currentProjectId = null;
-            currentProject = null;
-            if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
-                TopbarModule.renderProjectsList();
-            }
+    const projectsContainer = document.getElementById('projectsContainer');
+    const detailContainer = document.getElementById('projectDetailContainer');
+    if (projectsContainer && detailContainer) {
+        detailContainer.style.display = 'none';
+        detailContainer.innerHTML = ''; // очищаем
+        projectsContainer.style.display = 'block';
+        currentProjectId = null;
+        currentProject = null;
+        if (typeof TopbarModule !== 'undefined' && TopbarModule.renderProjectsList) {
+            TopbarModule.renderProjectsList();
         }
     }
+}
 
     function escapeHtml(str) {
         if (!str) return '';
