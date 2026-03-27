@@ -695,7 +695,8 @@ const TractsModule = (function() {
             calculateAll();
         });
 
-        document.getElementById('addPathBtnSidebar').addEventListener('click', () => addNewPath());
+        const addPathBtn = document.getElementById('addPathBtnSidebar');
+        if (addPathBtn) addPathBtn.addEventListener('click', () => addNewPath());
         document.getElementById('showAllTractsBtn').addEventListener('click', () => showAllTracts());
 
         const modal = document.getElementById('addDeviceModal');
