@@ -94,7 +94,7 @@
     </div>
 </div>
 <div class="app-layout">
-    <!-- Сайдбар (изначально скрыт, показывается только в разделе "Расчёты") -->
+    <!-- Сайдбар -->
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
             <h2>SPUTNIK STUDIO</h2>
@@ -105,7 +105,7 @@
         </div>
         <div id="sidebarSectionsContainer">
             <!-- ВСЕ АККОРДЕОНЫ (видео, сеть, LED, звук, ВКС, эргономика, тракты, статистика, энергия, управление) -->
-            <!-- В реальном файле они должны быть здесь. Для краткости оставлено пусто, но вы их уже добавили -->
+            <!-- Они должны быть здесь. Если их нет – скопируйте из вашего рабочего файла. -->
         </div>
         <div class="sidebar-footer">Sputnik Studio v7.0<br>© 2026</div>
     </div>
@@ -148,8 +148,8 @@
             <div id="powerCalculatorContainer" style="display: none;"></div>
         </div>
 
-        <!-- Управление проектами (список) – НЕ имеет класса section-container -->
-        <div id="projectsContainer" style="display: none;">
+        <!-- Управление проектами (список) -->
+        <div id="projectsContainer" class="section-container">
             <div class="dashboard-wrapper">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2>УПРАВЛЕНИЕ ПРОЕКТАМИ</h2>
@@ -159,8 +159,8 @@
             </div>
         </div>
 
-        <!-- Детальная страница проекта – НЕ имеет класса section-container -->
-        <div id="projectDetailContainer" style="display: none;"></div>
+        <!-- Детальная страница проекта -->
+        <div id="projectDetailContainer" class="section-container" style="display: none;"></div>
 
         <!-- Шаблоны документов -->
         <div id="templatesContainer" class="section-container">
