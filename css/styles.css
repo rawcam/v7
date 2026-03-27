@@ -1243,3 +1243,20 @@ input:focus, select:focus, textarea:focus {
     display: flex;
     flex-direction: column;
 }
+.main-content {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+}
+
+#calculationsContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#calculationsContainer .active-path-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
