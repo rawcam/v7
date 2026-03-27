@@ -1217,9 +1217,10 @@ input:focus, select:focus, textarea:focus {
     display: none;
 }
 #calculationsContainer.active {
-    min-height: calc(100vh - 64px);
+    height: calc(100vh - 64px);      /* фиксированная высота, без запаса */
     display: flex;
     flex-direction: column;
+    overflow-y: auto;                 /* если внутри будет много трактов, появится прокрутка, но сейчас её нет */
 }
 #calculationsContainer.active .active-path-container {
     flex: 1;
