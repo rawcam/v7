@@ -1217,10 +1217,10 @@ input:focus, select:focus, textarea:focus {
     display: none;
 }
 #calculationsContainer.active {
-    height: calc(100vh - 64px);      /* фиксированная высота, без запаса */
+    height: 100%;               /* занимает всю доступную высоту родителя */
     display: flex;
     flex-direction: column;
-    overflow-y: auto;                 /* если внутри будет много трактов, появится прокрутка, но сейчас её нет */
+    overflow-y: auto;           /* если трактов много, появится прокрутка внутри, а не на всей странице */
 }
 #calculationsContainer.active .active-path-container {
     flex: 1;
