@@ -1216,41 +1216,24 @@ input:focus, select:focus, textarea:focus {
 .sidebar-header .collapse-btn {
     display: none;
 }
-#calculationsContainer.active {
-    height: 100%;               /* занимает всю доступную высоту родителя */
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;           /* если трактов много, появится прокрутка внутри, а не на всей странице */
-}
-#calculationsContainer.active .active-path-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
-#calculationsContainer.active .active-path-container .empty-state {
-    max-width: 400px;
-    text-align: center;
-    margin-top: 20px;
-}
 .main-content {
     min-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
 }
-#calculationsContainer.active {
+#calculationsContainer.section-container.active {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;          /* если появятся тракты, прокрутка будет внутри */
+    overflow-y: auto;
 }
-#calculationsContainer.active .active-path-container {
+#calculationsContainer.section-container.active .active-path-container {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* прижимаем содержимое к верху */
+    justify-content: flex-start;
 }
-#calculationsContainer.active .active-path-container .empty-state {
+#calculationsContainer.section-container.active .active-path-container .empty-state {
     max-width: 400px;
     text-align: center;
     margin-top: 20px;
