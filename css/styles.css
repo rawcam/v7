@@ -1238,3 +1238,8 @@ input:focus, select:focus, textarea:focus {
     text-align: center;
     margin-top: 20px;
 }
+.main-content {
+    min-height: calc(100vh - 64px); /* чтобы занимать полную высоту под топбаром */
+    display: flex;
+    flex-direction: column;
+}
