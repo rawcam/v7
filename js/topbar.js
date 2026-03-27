@@ -592,28 +592,52 @@ const TopbarModule = (function() {
     }
 
     function switchToSection(section) {
-        console.log('switchToSection:', section);
-        currentSection = section;
-        document.querySelectorAll('.topbar-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.section === section);
-        });
-        document.querySelectorAll('.section-container').forEach(container => {
-            container.classList.toggle('active', container.id === `${section}Container`);
-        });
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.querySelector('.main-content');
-        if (section === 'calculations') {
-            if (sidebar) sidebar.classList.remove('hidden');
-            if (mainContent) mainContent.classList.remove('full-width');
-        } else {
-            if (sidebar) sidebar.classList.add('hidden');
-            if (mainContent) mainContent.classList.add('full-width');
-        }
-        if (section === 'dashboard') renderDashboard();
-        if (section === 'projects') renderProjectsList();
-        if (section === 'templates') renderTemplates();
+    console.log('switchToSection:', section);
+    currentSection = section;
+    document.querySelectorAll('.topbar-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === section);
+    });
+    document.querySelectorAll('.section-container').forEach(container => {
+        container.classList.toggle('active', container.id === `${section}Container`);
+    });
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+    if (section === 'calculations') {
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (mainContent) mainContent.classList.remove('full-width');
+    } else {
+        if (sidebar) sidebar.classList.add('hidden');
+        if (mainContent) mainContent.classList.add('full-width');
     }
 
+    // ========== УПРАВЛЕНИЕ ПРОЕКТАМИ ==========
+    const projectsContainer = document.getElementById('projectsContainer');
+    const detailContainer = document.getElementById('projectDetailContainer');
+
+    if (section === 'projects') {
+        // Показываем список проектов, скрываем детальную страницу
+        if (projectsContainer) projectsContainer.style.display = 'block';
+        if (detailContainer) {
+            detailContainer.style.display = 'none';
+            detailContainer.innerHTML = ''; // очищаем
+        }
+        renderProjectsList();
+    } else {
+        // При уходе из раздела проектов скрываем оба контейнера и очищаем детальную страницу
+        if (projectsContainer) projectsContainer.style.display = 'none';
+        if (detailContainer) {
+            detailContainer.style.display = 'none';
+            detailContainer.innerHTML = '';
+        }
+        // Если детальная страница была открыта, вызываем hideDetail для сброса состояния
+        if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
+            ProjectDetail.hideDetail();
+        }
+    }
+
+    if (section === 'dashboard') renderDashboard();
+    if (section === 'templates') renderTemplates();
+}
     function init() {
         loadProjects();
         renderDashboard();
