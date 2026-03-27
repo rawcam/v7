@@ -1216,4 +1216,19 @@ input:focus, select:focus, textarea:focus {
 .sidebar-header .collapse-btn {
     display: none;
 }
-
+#calculationsContainer.active {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+}
+#calculationsContainer.active .active-path-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+#calculationsContainer.active .active-path-container .empty-state {
+    max-width: 400px;
+    text-align: center;
+    margin-top: 20px;
+}
