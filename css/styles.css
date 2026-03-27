@@ -1211,32 +1211,21 @@ input:focus, select:focus, textarea:focus {
         justify-content: center;
     }
 }
-/* Центрирование пустого состояния трактов */
-#calculationsContainer {
+
+/* ========== ЦЕНТРИРОВАНИЕ ПУСТОГО СОСТОЯНИЯ ТРАКТОВ ========== */
+#calculationsContainer .active-path-container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - 64px);
 }
-#calculationsContainer .empty-state {
+#calculationsContainer .active-path-container .empty-state {
     max-width: 400px;
-    margin: 0 auto;
     text-align: center;
-}
-/* Скрываем кнопки в сайдбаре */
-.sidebar-header .header-actions {
-    display: none;
 }
 
-/* Центрируем пустое состояние трактов */
-.active-path-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 64px);
-}
-.active-path-container .empty-state {
-    max-width: 400px;
-    text-align: center;
+/* ========== СКРЫВАЕМ КНОПКИ В САЙДБАРЕ ========== */
+.sidebar-header .theme-switch,
+.sidebar-header .collapse-btn {
+    display: none;
 }
