@@ -1,8 +1,10 @@
-// topbar.js – стабильная версия
+// topbar.js – финальная версия с динамическим созданием контейнеров проектов
 const TopbarModule = (function() {
     let currentSection = 'dashboard';
     let projects = [];
     let projectsSwiper = null;
+    let projectsContainer = null;
+    let projectDetailContainer = null;
 
     console.log('topbar.js loaded');
 
@@ -110,6 +112,7 @@ const TopbarModule = (function() {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
     }
 
+    // ========== ОБЩАЯ СТАТИСТИКА ==========
     function renderStatsCard() {
         const total = projects.length;
         const active = projects.filter(p => p.status !== 'done').length;
@@ -136,6 +139,7 @@ const TopbarModule = (function() {
         `;
     }
 
+    // ========== ВИДЖЕТЫ ==========
     function renderBudgetWidget() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const totalBudget = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
@@ -372,6 +376,7 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== АКТИВНЫЕ ПРОЕКТЫ (КАРУСЕЛЬ) ==========
     function renderProjectCards() {
         const activeProjects = projects.filter(p => p.status !== 'done');
         const container = document.getElementById('projectCardsContainer');
@@ -444,6 +449,7 @@ const TopbarModule = (function() {
         });
     }
 
+    // ========== ДАШБОРД ==========
     function renderDashboard() {
         renderStatsCard();
         renderBudgetWidget();
@@ -452,6 +458,47 @@ const TopbarModule = (function() {
         renderMeetingsWidget();
         renderWorkloadWidget();
         renderProjectCards();
+    }
+
+    // ========== УПРАВЛЕНИЕ ПРОЕКТАМИ (ДИНАМИЧЕСКОЕ) ==========
+    function createProjectsContainers() {
+        projectsContainer = document.createElement('div');
+        projectsContainer.id = 'projectsContainer';
+        projectsContainer.style.display = 'block';
+        projectsContainer.innerHTML = `
+            <div class="dashboard-wrapper">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>УПРАВЛЕНИЕ ПРОЕКТАМИ</h2>
+                    <button class="btn-primary" id="createProjectBtn"><i class="fas fa-plus"></i> Новый проект</button>
+                </div>
+                <div id="projectsList" class="projects-list"></div>
+            </div>
+        `;
+
+        projectDetailContainer = document.createElement('div');
+        projectDetailContainer.id = 'projectDetailContainer';
+        projectDetailContainer.style.display = 'none';
+
+        const mainContent = document.getElementById('mainContent');
+        const templatesContainer = document.getElementById('templatesContainer');
+        if (mainContent && templatesContainer) {
+            mainContent.insertBefore(projectsContainer, templatesContainer);
+            mainContent.insertBefore(projectDetailContainer, templatesContainer);
+        }
+
+        const createBtn = document.getElementById('createProjectBtn');
+        if (createBtn) createBtn.addEventListener('click', createNewProject);
+    }
+
+    function removeProjectsContainers() {
+        if (projectsContainer && projectsContainer.parentNode) {
+            projectsContainer.parentNode.removeChild(projectsContainer);
+            projectsContainer = null;
+        }
+        if (projectDetailContainer && projectDetailContainer.parentNode) {
+            projectDetailContainer.parentNode.removeChild(projectDetailContainer);
+            projectDetailContainer = null;
+        }
     }
 
     function renderProjectsList() {
@@ -528,6 +575,7 @@ const TopbarModule = (function() {
         }
     }
 
+    // ========== ШАБЛОНЫ ==========
     function renderTemplates() {
         const projectSelect = document.getElementById('templateProjectSelect');
         if (projectSelect) {
@@ -591,53 +639,47 @@ const TopbarModule = (function() {
         }
     }
 
+    // ========== ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ==========
     function switchToSection(section) {
-    console.log('switchToSection:', section);
-    currentSection = section;
-    document.querySelectorAll('.topbar-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.section === section);
-    });
-    document.querySelectorAll('.section-container').forEach(container => {
-        container.classList.toggle('active', container.id === `${section}Container`);
-    });
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.querySelector('.main-content');
-    if (section === 'calculations') {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (mainContent) mainContent.classList.remove('full-width');
-    } else {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (mainContent) mainContent.classList.add('full-width');
+        console.log('switchToSection:', section);
+        currentSection = section;
+        document.querySelectorAll('.topbar-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.section === section);
+        });
+        document.querySelectorAll('.section-container').forEach(container => {
+            container.classList.toggle('active', container.id === `${section}Container`);
+        });
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        if (section === 'calculations') {
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (mainContent) mainContent.classList.remove('full-width');
+        } else {
+            if (sidebar) sidebar.classList.add('hidden');
+            if (mainContent) mainContent.classList.add('full-width');
+        }
+
+        if (section === 'projects') {
+            if (!projectsContainer) {
+                createProjectsContainers();
+            } else {
+                projectsContainer.style.display = 'block';
+                if (projectDetailContainer) projectDetailContainer.style.display = 'none';
+            }
+            renderProjectsList();
+        } else {
+            if (projectsContainer) {
+                removeProjectsContainers();
+            }
+            if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
+                ProjectDetail.hideDetail();
+            }
+        }
+
+        if (section === 'dashboard') renderDashboard();
+        if (section === 'templates') renderTemplates();
     }
 
-    // ========== УПРАВЛЕНИЕ ПРОЕКТАМИ ==========
-    const projectsContainer = document.getElementById('projectsContainer');
-    const detailContainer = document.getElementById('projectDetailContainer');
-
-    if (section === 'projects') {
-        // Показываем список проектов, скрываем детальную страницу
-        if (projectsContainer) projectsContainer.style.display = 'block';
-        if (detailContainer) {
-            detailContainer.style.display = 'none';
-            detailContainer.innerHTML = ''; // очищаем
-        }
-        renderProjectsList();
-    } else {
-        // При уходе из раздела проектов скрываем оба контейнера и очищаем детальную страницу
-        if (projectsContainer) projectsContainer.style.display = 'none';
-        if (detailContainer) {
-            detailContainer.style.display = 'none';
-            detailContainer.innerHTML = '';
-        }
-        // Если детальная страница была открыта, вызываем hideDetail для сброса состояния
-        if (typeof ProjectDetail !== 'undefined' && ProjectDetail.hideDetail) {
-            ProjectDetail.hideDetail();
-        }
-    }
-
-    if (section === 'dashboard') renderDashboard();
-    if (section === 'templates') renderTemplates();
-}
     function init() {
         loadProjects();
         renderDashboard();
@@ -647,8 +689,6 @@ const TopbarModule = (function() {
             btn.addEventListener('click', () => switchToSection(btn.dataset.section));
         });
 
-        const createBtn = document.getElementById('createProjectBtn');
-        if (createBtn) createBtn.addEventListener('click', createNewProject);
         const generateBtn = document.getElementById('generateDocBtn');
         if (generateBtn) generateBtn.addEventListener('click', generateDocument);
 
