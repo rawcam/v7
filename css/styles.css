@@ -1212,12 +1212,17 @@ input:focus, select:focus, textarea:focus {
     }
 }
 
-/* ========== ЦЕНТРИРОВАНИЕ ПУСТОГО СОСТОЯНИЯ ТРАКТОВ ========== */
+/* Центрирование пустого состояния трактов */
+#calculationsContainer {
+    min-height: calc(100vh - 64px); /* вычитаем высоту топбара */
+    display: flex;
+    flex-direction: column;
+}
 #calculationsContainer .active-path-container {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 64px);
 }
 #calculationsContainer .active-path-container .empty-state {
     max-width: 400px;
