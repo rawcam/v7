@@ -1224,3 +1224,19 @@ input:focus, select:focus, textarea:focus {
     margin: 0 auto;
     text-align: center;
 }
+/* Скрываем кнопки в сайдбаре */
+.sidebar-header .header-actions {
+    display: none;
+}
+
+/* Центрируем пустое состояние трактов */
+.active-path-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 64px);
+}
+.active-path-container .empty-state {
+    max-width: 400px;
+    text-align: center;
+}
