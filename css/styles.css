@@ -1234,3 +1234,19 @@ input:focus, select:focus, textarea:focus {
 .sidebar-header .collapse-btn {
     display: none;
 }
+/* Исправление пустого состояния трактов */
+#calculationsContainer {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+}
+#calculationsContainer .active-path-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#calculationsContainer .active-path-container .empty-state {
+    max-width: 400px;
+    text-align: center;
+}
